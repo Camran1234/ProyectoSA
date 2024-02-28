@@ -148,6 +148,7 @@ CREATE TABLE IF NOT EXISTS `ticketDB`.`History_of_Communication` (
   `dateTimeContacted` DATETIME NOT NULL,
   `sent` TEXT NOT NULL,
   `recieved` TEXT NOT NULL,
+  `description` TEXT NOT NULL,
   PRIMARY KEY (`idHistory`, `ticketNumber`),
   INDEX `fx_History_of_Communication_Ticket_ticketNumber_idx` (`ticketNumber` ASC) VISIBLE,
   CONSTRAINT `fx_History_of_Communication_TicketTracking_ticketNumber`
