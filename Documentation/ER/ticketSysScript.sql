@@ -147,7 +147,7 @@ CREATE TABLE IF NOT EXISTS `ticketDB`.`History_of_Communication` (
   `ticketNumber` INT NOT NULL,
   `dateTimeContacted` DATETIME NOT NULL,
   `sent` TEXT NOT NULL,
-  `recieved` TEXT NOT NULL,
+  `received` TEXT NOT NULL,
   `description` TEXT NOT NULL,
   PRIMARY KEY (`idHistory`, `ticketNumber`),
   INDEX `fx_History_of_Communication_Ticket_ticketNumber_idx` (`ticketNumber` ASC) VISIBLE,
