@@ -46,33 +46,6 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `ticketDB`.`Ticket`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `ticketDB`.`Ticket` (
-  `ticketNumber` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(250) NOT NULL,
-  `lastName` VARCHAR(250) NOT NULL,
-  `phone` VARCHAR(30) NOT NULL,
-  `description` TEXT NOT NULL,
-  `ticketType` INT NOT NULL,
-  `priority` INT NOT NULL,
-  PRIMARY KEY (`ticketNumber`),
-  INDEX `fx_Ticket_TicketProblem_ticketType_idx` (`ticketType` ASC) VISIBLE,
-  INDEX `fx_Ticket_TicketPriority_priority_idx` (`priority` ASC) VISIBLE,
-  CONSTRAINT `fx_Ticket_TicketProblem_ticketType`
-    FOREIGN KEY (`ticketType`)
-    REFERENCES `ticketDB`.`TicketType` (`idTicketProblem`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fx_Ticket_TicketPriority_priority`
-    FOREIGN KEY (`priority`)
-    REFERENCES `ticketDB`.`TicketPriority` (`idTicketPriority`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `ticketDB`.`UserType`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `ticketDB`.`UserType` (
@@ -96,8 +69,42 @@ CREATE TABLE IF NOT EXISTS `ticketDB`.`User` (
   CONSTRAINT `fx_User_UserType_userTpe`
     FOREIGN KEY (`userType`)
     REFERENCES `ticketDB`.`UserType` (`idUserType`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `ticketDB`.`Ticket`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `ticketDB`.`Ticket` (
+  `ticketNumber` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(250) NOT NULL,
+  `lastName` VARCHAR(250) NOT NULL,
+  `phone` VARCHAR(30) NOT NULL,
+  `description` TEXT NOT NULL,
+  `ticketType` INT NOT NULL,
+  `priority` INT NOT NULL,
+  `owner` INT NOT NULL,
+  PRIMARY KEY (`ticketNumber`),
+  INDEX `fx_Ticket_TicketProblem_ticketType_idx` (`ticketType` ASC) VISIBLE,
+  INDEX `fx_Ticket_TicketPriority_priority_idx` (`priority` ASC) VISIBLE,
+  INDEX `fx_Ticket_User_owner_idx` (`owner` ASC) VISIBLE,
+  CONSTRAINT `fx_Ticket_TicketProblem_ticketType`
+    FOREIGN KEY (`ticketType`)
+    REFERENCES `ticketDB`.`TicketType` (`idTicketProblem`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fx_Ticket_TicketPriority_priority`
+    FOREIGN KEY (`priority`)
+    REFERENCES `ticketDB`.`TicketPriority` (`idTicketPriority`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fx_Ticket_User_owner`
+    FOREIGN KEY (`owner`)
+    REFERENCES `ticketDB`.`User` (`idUser`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -107,35 +114,28 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `ticketDB`.`TicketTracking` (
   `ticketNumber` INT NOT NULL,
   `state` INT NOT NULL,
-  `prioridad` INT NOT NULL,
   `dateofCreation` DATE NOT NULL,
   `dateLastUpdate` DATE NULL,
   `agent` INT NULL,
   `problemSolved` TINYINT NOT NULL,
   PRIMARY KEY (`ticketNumber`),
   INDEX `fx_Ticket_State_of_Ticket_state_idx` (`state` ASC) VISIBLE,
-  INDEX `fx_TicketTracking_TicketPriority_priority_idx` (`prioridad` ASC) VISIBLE,
   INDEX `fx_TicketTracking_User_agent_idx` (`agent` ASC) VISIBLE,
   CONSTRAINT `fx_TicketTracking_State_of_Ticket_state`
     FOREIGN KEY (`state`)
     REFERENCES `ticketDB`.`State_of_Ticket` (`idState`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fx_TicketTracking_Tiket_ticketNumber`
     FOREIGN KEY (`ticketNumber`)
     REFERENCES `ticketDB`.`Ticket` (`ticketNumber`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fx_TicketTracking_TicketPriority_priority`
-    FOREIGN KEY (`prioridad`)
-    REFERENCES `ticketDB`.`TicketPriority` (`idTicketPriority`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fx_TicketTracking_User_agent`
     FOREIGN KEY (`agent`)
     REFERENCES `ticketDB`.`User` (`idUser`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -154,8 +154,8 @@ CREATE TABLE IF NOT EXISTS `ticketDB`.`History_of_Communication` (
   CONSTRAINT `fx_History_of_Communication_TicketTracking_ticketNumber`
     FOREIGN KEY (`ticketNumber`)
     REFERENCES `ticketDB`.`TicketTracking` (`ticketNumber`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -171,8 +171,27 @@ CREATE TABLE IF NOT EXISTS `ticketDB`.`TicketElement` (
   CONSTRAINT `fx_TicketElement_Ticket_ticketNumber`
     FOREIGN KEY (`ticketNumber`)
     REFERENCES `ticketDB`.`Ticket` (`ticketNumber`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `ticketDB`.`Survey`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `ticketDB`.`Survey` (
+  `idSurvey` INT NOT NULL AUTO_INCREMENT,
+  `ticketNumber` INT NOT NULL,
+  `satisfaction` INT NOT NULL,
+  `timeService` INT NOT NULL,
+  `qualityService` INT NOT NULL,
+  PRIMARY KEY (`idSurvey`),
+  INDEX `fx_Survey_Ticket_ticketNumber_idx` (`ticketNumber` ASC) VISIBLE,
+  CONSTRAINT `fx_Survey_Ticket_ticketNumber`
+    FOREIGN KEY (`ticketNumber`)
+    REFERENCES `ticketDB`.`Ticket` (`ticketNumber`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
