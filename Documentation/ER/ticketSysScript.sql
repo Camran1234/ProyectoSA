@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS `ticketDB`.`Ticket` (
   `description` TEXT NOT NULL,
   `ticketType` INT NOT NULL,
   `priority` INT NOT NULL,
-  `owner` INT NOT NULL,
+  `owner` INT NULL,
   PRIMARY KEY (`ticketNumber`),
   INDEX `fx_Ticket_TicketProblem_ticketType_idx` (`ticketType` ASC) VISIBLE,
   INDEX `fx_Ticket_TicketPriority_priority_idx` (`priority` ASC) VISIBLE,
