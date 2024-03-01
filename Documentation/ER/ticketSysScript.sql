@@ -79,6 +79,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `ticketDB`.`Ticket` (
   `ticketNumber` INT NOT NULL AUTO_INCREMENT,
+  `email` VARCHAR(500) NOT NULL,
   `name` VARCHAR(250) NOT NULL,
   `lastName` VARCHAR(250) NOT NULL,
   `phone` VARCHAR(30) NOT NULL,
