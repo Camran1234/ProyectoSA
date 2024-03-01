@@ -60,6 +60,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `ticketDB`.`User` (
   `idUser` INT NOT NULL AUTO_INCREMENT,
+  `username` VARCHAR(250) NOT NULL,
+  `password` TEXT NOT NULL,
   `name` VARCHAR(200) NOT NULL,
   `lastName` VARCHAR(200) NOT NULL,
   `phone` VARCHAR(30) NOT NULL,
