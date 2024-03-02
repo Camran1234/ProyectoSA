@@ -1,14 +1,15 @@
 package com.spring.tiketsys.dto.entity;
 
+import com.spring.tiketsys.dto.ParserEntity;
+import com.spring.tiketsys.dto.model.SurveyDTO;
 import jakarta.persistence.*;
 import lombok.NonNull;
 
 @Entity
 @Table(name="Survey")
-public class Survey {
+public class Survey implements ParserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NonNull
     @Column(name="idSurvey")
     private int idSurvey;
     @NonNull
@@ -24,8 +25,7 @@ public class Survey {
 
     public Survey() {
     }
-    public Survey(@NonNull int idSurvey, @NonNull Ticket ticketNumber, @NonNull int satisfaction, @NonNull int timeService, @NonNull int qualityService) {
-        this.idSurvey = idSurvey;
+    public Survey(@NonNull Ticket ticketNumber, @NonNull int satisfaction, @NonNull int timeService, @NonNull int qualityService) {
         this.ticketNumber = ticketNumber;
         this.satisfaction = satisfaction;
         this.timeService = timeService;
@@ -70,5 +70,32 @@ public class Survey {
 
     public void setQualityService(int qualityService) {
         this.qualityService = qualityService;
+    }
+
+
+    @Override
+    public SurveyDTO parseToDTO() {
+        return new SurveyDTO(
+                getIdSurvey(),
+                getTicketNumber().getTicketNumber(),
+                getSatisfaction(),
+                getTimeService(),
+                getQualityService());
+    }
+
+    @Override
+    public Survey parseToEntity() {
+        return this;
+    }
+
+    @Override
+    public String toCSV() {
+        StringBuffer string = new StringBuffer();
+        string.append(getIdSurvey()+",");
+        string.append(getTicketNumber().getTicketNumber()+",");
+        string.append(getSatisfaction()+",");
+        string.append(getTimeService()+",");
+        string.append(getQualityService()+"\n");
+        return string.toString();
     }
 }

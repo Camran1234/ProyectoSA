@@ -10,7 +10,6 @@ import lombok.NonNull;
 public class TicketElement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NonNull
     @Column (name = "idTicketElement")
     private int idTicketElement;
     @Id

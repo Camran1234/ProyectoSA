@@ -1,6 +1,8 @@
 package com.spring.tiketsys.dto.entity;
 
+import com.spring.tiketsys.dto.ParserEntity;
 import com.spring.tiketsys.dto.entity.compundkeys.History_of_CommunicationId;
+import com.spring.tiketsys.dto.model.History_of_CommunicationDTO;
 import jakarta.persistence.*;
 import lombok.NonNull;
 
@@ -9,9 +11,8 @@ import java.util.Date;
 @Entity
 @IdClass(History_of_CommunicationId.class)
 @Table(name="History_of_Communication")
-public class History_of_Communication {
+public class History_of_Communication implements ParserEntity {
     @Id
-    @NonNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idHistory")
     private int idHistory;
@@ -21,10 +22,8 @@ public class History_of_Communication {
     @NonNull
     @Column(name = "dateTimeContacted", columnDefinition = "DATETIME")
     private Date dateTimeContacted;
-    @NonNull
     @Column(name="sent", columnDefinition = "TEXT")
     private String sent;
-    @NonNull
     @Column(name="received", columnDefinition = "TEXT")
     private String received;
     @NonNull
@@ -34,8 +33,7 @@ public class History_of_Communication {
     public History_of_Communication() {
     }
 
-    public History_of_Communication(@NonNull int idHistory, @NonNull int ticketNumber, @NonNull Date dateTimeContacted, @NonNull String sent, @NonNull String received, @NonNull String description) {
-        this.idHistory = idHistory;
+    public History_of_Communication(@NonNull int ticketNumber, @NonNull Date dateTimeContacted, String sent, String received, @NonNull String description) {
         this.ticketNumber = ticketNumber;
         this.dateTimeContacted = dateTimeContacted;
         this.sent = sent;
@@ -89,5 +87,35 @@ public class History_of_Communication {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public History_of_CommunicationDTO parseToDTO() {
+        //int idHistory, int ticketNumber, Date dateTimeContacted, String sent, String received, String description
+        return new History_of_CommunicationDTO(
+                this.getIdHistory(),
+                this.getTicketNumber(),
+                this.getDateTimeContacted(),
+                this.getSent(),
+                this.getRecieved(),
+                this.getDescription()
+        );
+    }
+
+    @Override
+    public History_of_Communication parseToEntity() {
+        return this;
+    }
+
+    @Override
+    public String toCSV() {
+        StringBuffer string = new StringBuffer();
+        string.append(getIdHistory());
+        string.append(getTicketNumber());
+        string.append(getDateTimeContacted());
+        string.append(getSent());
+        string.append(getRecieved());
+        string.append(getDescription());
+        return string.toString();
     }
 }

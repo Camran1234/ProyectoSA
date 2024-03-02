@@ -2,6 +2,7 @@ package com.spring.tiketsys.dto.model;
 
 public class TicketDTO {
     private int ticketNumber;
+    private String email;
     private String name;
     private String lastName;
     private String phone;
@@ -13,8 +14,9 @@ public class TicketDTO {
     public TicketDTO() {
     }
 
-    public TicketDTO(int ticketNumber, String name, String lastName, String phone, String description, int ticketType, int priority, int owner) {
+    public TicketDTO(int ticketNumber, String email, String name, String lastName, String phone, String description, int ticketType, int priority, int owner) {
         this.ticketNumber = ticketNumber;
+        this.email = email;
         this.name = name;
         this.lastName = lastName;
         this.phone = phone;

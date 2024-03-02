@@ -8,7 +8,6 @@ import lombok.NonNull;
 public class State_of_Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NonNull
     @Column (name = "idState")
     private int idState;
     @NonNull
@@ -36,4 +35,6 @@ public class State_of_Ticket {
     public void setState(String state) {
         this.state = state;
     }
+
+
 }

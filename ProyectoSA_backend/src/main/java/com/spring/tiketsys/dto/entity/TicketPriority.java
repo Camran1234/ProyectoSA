@@ -8,7 +8,6 @@ import lombok.NonNull;
 public class TicketPriority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NonNull
     @Column (name = "idTicketPriority")
     private int idTicketPriority;
     @NonNull

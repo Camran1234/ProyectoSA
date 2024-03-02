@@ -1,16 +1,20 @@
 package com.spring.tiketsys.dto.entity;
 
+import com.spring.tiketsys.dto.ParserEntity;
+import com.spring.tiketsys.dto.model.TicketDTO;
 import jakarta.persistence.*;
 import lombok.NonNull;
 
 @Entity
 @Table(name="Ticket")
-public class Ticket {
+public class Ticket implements ParserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NonNull
     @Column (name = "ticketNumber")
     private int ticketNumber;
+    @NonNull
+    @Column(name="email")
+    private String email;
     @NonNull
     @Column (name = "name")
     private String name;
@@ -32,13 +36,12 @@ public class Ticket {
     @JoinColumn(name = "priority", referencedColumnName = "idTicketPriority")
     private TicketPriority priority;
 
-    @NonNull
     @ManyToOne
     @JoinColumn(name="owner", referencedColumnName = "idUser")
     private User owner;
 
-    public Ticket(@NonNull int ticketNumber, @NonNull String name, @NonNull String lastName, @NonNull String phone, @NonNull String description, @NonNull TicketType ticketType, @NonNull TicketPriority priority, @NonNull User owner) {
-        this.ticketNumber = ticketNumber;
+    public Ticket(@NonNull String email, @NonNull String name, @NonNull String lastName, @NonNull String phone, @NonNull String description, @NonNull TicketType ticketType, @NonNull TicketPriority priority, User owner) {
+        this.email = email;
         this.name = name;
         this.lastName = lastName;
         this.phone = phone;
@@ -49,6 +52,22 @@ public class Ticket {
     }
 
     public Ticket(){}
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
 
     public int getTicketNumber() {
         return ticketNumber;
@@ -104,5 +123,30 @@ public class Ticket {
 
     public void setPriority(TicketPriority priority) {
         this.priority = priority;
+    }
+
+    @Override
+    public TicketDTO parseToDTO() {
+        return new TicketDTO(
+                this.ticketNumber,
+                this.email,
+                this.name,
+                this.lastName,
+                this.phone,
+                this.description,
+                this.ticketType.getIdTicketProblem(),
+                this.priority.getIdTicketPriority(),
+                this.owner.getIdUser()
+        );
+    }
+
+    @Override
+    public Ticket parseToEntity() {
+        return this;
+    }
+
+    @Override
+    public String toCSV() {
+        return null;
     }
 }
