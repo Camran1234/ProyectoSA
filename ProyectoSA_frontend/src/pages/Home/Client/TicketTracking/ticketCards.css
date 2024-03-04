@@ -1,0 +1,36 @@
+
+.card-title{
+    color: white;
+}
+
+.containerTickets{
+    position: absolute;
+    left: 10%;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    max-width: 75%;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.ticket-cards-scrollable {
+    display: flex;
+    flex-direction: row;
+}
+
+.ticket-cards-scrollable .card {
+    flex-shrink: 0;
+}
+
+.custom-button {
+    /* Agrega tus estilos personalizados aquí */
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: small;
+    font-weight: bolder;
+    background-color: blue;
+    border-color: blue; /* Cambia el color del borde si lo necesitas */
+}
+
+.custom-button:hover {
+    background-color: darkblue; /* Cambia el color de fondo cuando el botón se encuentra en estado de hover */
+}
