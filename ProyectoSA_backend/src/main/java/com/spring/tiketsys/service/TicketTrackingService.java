@@ -14,16 +14,16 @@ public class TicketTrackingService {
     @Autowired
     private TicketTrackingRepository ticketTrackingRepository;
 
-    public TicketTracking getReferencedById(int id){
-        return  ticketTrackingRepository.getReferenceById(id);
+    public TicketTracking findById(int id){
+        return  ticketTrackingRepository.findById(id).get();
     }
 
 
-    public void saveTicket(TicketTracking ticketTracking){
-        ticketTrackingRepository.saveAndFlush(ticketTracking);
+    public TicketTracking saveTicket(TicketTracking ticketTracking){
+        return ticketTrackingRepository.saveAndFlush(ticketTracking);
     }
 
-    public void createTrack(Ticket ticket, State_of_Ticket stateOfTicket){
+    public TicketTracking createTrack(Ticket ticket, State_of_Ticket stateOfTicket){
 
         TicketTracking ticketTracking = new TicketTracking(
                 ticket.getTicketNumber(),
@@ -34,7 +34,7 @@ public class TicketTrackingService {
                 false,
                 ticket
         );
-        ticketTrackingRepository.saveAndFlush(ticketTracking);
+        return ticketTrackingRepository.saveAndFlush(ticketTracking);
     }
 
 }

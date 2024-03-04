@@ -2,14 +2,16 @@ package com.spring.tiketsys.dto.entity;
 
 import com.spring.tiketsys.dto.entity.compundkeys.TicketElementId;
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.NonNull;
 
 @Entity
 @IdClass(TicketElementId.class)
 @Table(name="TicketElement")
+@Data
 public class TicketElement {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NonNull
     @Column (name = "idTicketElement")
     private int idTicketElement;
     @Id
@@ -18,9 +20,8 @@ public class TicketElement {
     private int ticketNumber;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @NonNull
     @JoinColumn(name = "ticketNumber", referencedColumnName = "ticketNumber", insertable = false, updatable = false)
-    private Ticket ticketNumberObject;
+    private Ticket ticket;
 
     @Column(name="url", columnDefinition = "TEXT")
     private String url;
@@ -28,10 +29,9 @@ public class TicketElement {
     public TicketElement() {
     }
 
-    public TicketElement(@NonNull int idTicketElement, @NonNull int ticketNumber, @NonNull Ticket ticketNumberObject, String url) {
+    public TicketElement(int idTicketElement, @NonNull int ticketNumber, String url) {
         this.idTicketElement = idTicketElement;
         this.ticketNumber = ticketNumber;
-        this.ticketNumberObject = ticketNumberObject;
         this.url = url;
     }
 
@@ -52,11 +52,11 @@ public class TicketElement {
     }
 
     public Ticket getTicketNumberObject() {
-        return ticketNumberObject;
+        return ticket;
     }
 
     public void setTicketNumberObject(Ticket ticketNumberObject) {
-        this.ticketNumberObject = ticketNumberObject;
+        this.ticket = ticketNumberObject;
     }
 
     public String getUrl() {

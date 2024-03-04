@@ -53,14 +53,14 @@ public class TicketTrackingController {
                     jsonNode.get("state").asText()
             );
             //Find the ticket
-            TicketTracking ticketTracking = ticketTrackingService.getReferencedById(
+            TicketTracking ticketTracking = ticketTrackingService.findById(
                     jsonNode.get("ticketNumber").asInt()
             );
             ticketTracking.setState(stateOfTicket);
             ticketTracking.setDateLastUpdation(new Date());
-            ticketTrackingService.saveTicket(ticketTracking);
+            ticketTracking=ticketTrackingService.saveTicket(ticketTracking);
             historyOfCommunicationService.saveLog(
-                    jsonNode.get("ticketNumber").asInt(),
+                    ticketTracking,
                     "Se cambio el estado del ticket a "+(jsonNode.get("state").asText())
             );
             return ResponseEntity.status(HttpStatus.OK).build();
@@ -73,14 +73,14 @@ public class TicketTrackingController {
     public ResponseEntity<?> solve(@Validated @RequestBody String json){
         try{
             JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);
-            TicketTracking ticketTracking = ticketTrackingService.getReferencedById(
+            TicketTracking ticketTracking = ticketTrackingService.findById(
                     jsonNode.get("ticketNumber").asInt()
             );
             ticketTracking.setProblemSolved(true);
             ticketTracking.setDateLastUpdation(new Date());
-            ticketTrackingService.saveTicket(ticketTracking);
+            ticketTracking=ticketTrackingService.saveTicket(ticketTracking);
             historyOfCommunicationService.saveLog(
-                    jsonNode.get("ticketNumber").asInt(),
+                    ticketTracking,
                     "Se resolvio el ticket"
             );
             return ResponseEntity.status(HttpStatus.OK).build();
@@ -112,12 +112,13 @@ public class TicketTrackingController {
             JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);
             String agentUsername = jwtChecker.getSubject(authorizationHeader);
             User agent = userService.getUser(agentUsername);
-            TicketTracking ticket =  ticketTrackingService.getReferencedById(jsonNode.get("ticketNumber").asInt());
-            ticket.setAgent(agent);
+            TicketTracking ticketTracking =  ticketTrackingService.findById(jsonNode.get("ticketNumber").asInt());
+            ticketTracking.setAgent(agent);
+            ticketTracking = ticketTrackingService.saveTicket(ticketTracking);
             historyOfCommunicationService.saveLog(
-                    jsonNode.get("ticketNumber").asInt(),
-                    "El ticket se asigno a "+ticket.getAgent().getName()+
-                            " "+ticket.getAgent().getLastName()+" usuario: "+ticket.getAgent().getUsername()
+                    ticketTracking,
+                    "El ticket se asigno a "+ticketTracking.getAgent().getName()+
+                            " "+ticketTracking.getAgent().getLastName()+" usuario: "+ticketTracking.getAgent().getUsername()
             );
             return ResponseEntity.status(HttpStatus.CREATED).build();
         }catch(Exception ex){
@@ -130,7 +131,7 @@ public class TicketTrackingController {
         try{
             JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);
             int ticketNumber = jsonNode.get("ticketNumber").asInt();
-            TicketTracking ticketTracking = ticketTrackingService.getReferencedById(ticketNumber);
+            TicketTracking ticketTracking = ticketTrackingService.findById(ticketNumber);
             return new ResponseEntity<>(ticketTracking, HttpStatus.OK);
         }catch(Exception ex){
             return new ResponseEntity<>(new Message("Error en obtencion de datos del cliente "+ex.getMessage()), HttpStatus.BAD_REQUEST);
@@ -147,7 +148,7 @@ public class TicketTrackingController {
             JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);
             int ticketNumber = jsonNode.get("ticketNumber").asInt();
             //Obtener El track del ticket y el historial
-            TicketTracking ticketTracking = ticketTrackingService.getReferencedById(ticketNumber);
+            TicketTracking ticketTracking = ticketTrackingService.findById(ticketNumber);
             List<History_of_CommunicationDTO> historyOfCommunication = historyOfCommunicationService.getLogs(ticketNumber);
 
             //Armar la respuesta

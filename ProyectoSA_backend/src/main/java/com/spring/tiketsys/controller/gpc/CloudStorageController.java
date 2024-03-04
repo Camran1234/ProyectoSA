@@ -1,17 +1,27 @@
 package com.spring.tiketsys.controller.gpc;
 
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
+import com.google.cloud.storage.*;
+import com.spring.tiketsys.security.entity.Message;
+import com.spring.tiketsys.service.GCPService;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
+
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 
 @RestController
@@ -19,33 +29,31 @@ import java.io.InputStream;
 @RequestMapping("/api/cloud-storage")
 public class CloudStorageController {
 
-    @Value("${gcs.bucket.name}")
-    private String bucketName;
+    @Autowired
+    GCPService gcpService;
 
-    private Storage storage;
+//    public CloudStorageController() {
+//        // Inicializa el cliente de Google Cloud Storage
+//        this.storage = StorageOptions.getDefaultInstance().getService();
+//    }
 
-    public CloudStorageController() {
-        // Inicializa el cliente de Google Cloud Storage
-        this.storage = StorageOptions.getDefaultInstance().getService();
+    @GetMapping("/send-data")
+    public String sendData() throws IOException{
+        gcpService.uploadSample();
+        return "File created of gatitos";
     }
 
     @PostMapping("/uploadFile")
-    public Flux<String> uploadFile(@RequestPart("file") FilePart filePart) {
+    public ResponseEntity<?> uploadFile(@RequestPart("file") FilePart filePart) {
         // Obtener el contenido del archivo como InputStream
-
-        return filePart.content()
-                .flatMap(dataBuffer -> {
-                    InputStream inputStream = dataBuffer.asInputStream();
-                    // Subir el archivo a Google Cloud Storage
-                    return Mono.fromCallable(() -> storage.create(
-                            BlobInfo.newBuilder("your-bucket-name", "uploaded-files/" + filePart.filename()).build(),
-                            inputStream));
-                })
-                .map(blob -> {
-                    // Obtener la URL de acceso al objeto
-                    String uri = blob.getMediaLink();
-                    // Devolver la URL de acceso al objeto
-                    return "File uploaded successfully. Access URL: " + uri;
-                });
+        try {
+            String url = gcpService.uploadFile(filePart);
+            Map<String, Object> provider = new HashMap<>();
+            provider.put("url", url);
+            System.out.println("Retornando: "+url);
+            return new ResponseEntity<>(provider, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new Message("Error! "+e.getMessage()),HttpStatus.BAD_REQUEST);
+        }
     }
 }

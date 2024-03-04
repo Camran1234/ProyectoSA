@@ -18,11 +18,12 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "*")
 @RequestMapping("/api/user")
 public class UserController {
     @Autowired
@@ -33,6 +34,13 @@ public class UserController {
     JwtProvider jwtProvider;
     @Autowired
     JwtChecker jwtChecker;
+    @Autowired
+    Encrypter encrypter;
+    @GetMapping("/")
+    public String helloWorld(){
+        return "HelloWorld";
+    }
+
     /**
      * Provide
      * {
@@ -49,26 +57,9 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Validated @RequestBody String json) {
         try{
-            JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);
-            String passwordEncrypted = new Encrypter().encrypt(jsonNode.get("password").asText());
-            UserType userType = userTypeService.getByType(jsonNode.get("userType").asText());
-
-            if(userService.usernameExists(jsonNode.get("username").asText())){
-                throw new TicketException("Usuario en uso");
-            }
-
-            User user = new User(
-                    jsonNode.get("username").asText(),
-                    passwordEncrypted,
-                    jsonNode.get("name").asText(),
-                    jsonNode.get("lastName").asText(),
-                    jsonNode.get("phone").asText(),
-                    userType
-            );
-            //Registramos el usuario
-            userService.registerUser(user);
-            return ResponseEntity.status(HttpStatus.CREATED).build();
+            return register(json);
         }catch(Exception ex){
+            ex.printStackTrace();
             return new ResponseEntity<>(new Message("Error en registro: "+ex.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
@@ -78,7 +69,7 @@ public class UserController {
      * {
      *     username:
      *     password:
-     *     userType: [as Role or Type]
+     *     userType: [as Role or Type] [options: cliente, agente, administrador]
      *     name:
      *     lastName:
      *     phone:
@@ -95,28 +86,33 @@ public class UserController {
                 return new ResponseEntity<>(new Message("Sesión inválida"), HttpStatus.FORBIDDEN);
             }
 
-            JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);
-            String passwordEncrypted = new Encrypter().encrypt(jsonNode.get("password").asText());
-            UserType userType = userTypeService.getByType(jsonNode.get("userType").asText());
-
-            if(userService.usernameExists(jsonNode.get("username").asText())){
-                throw new TicketException("Usuario en uso");
-            }
-
-            User user = new User(
-                    jsonNode.get("username").asText(),
-                    passwordEncrypted,
-                    jsonNode.get("name").asText(),
-                    jsonNode.get("lastName").asText(),
-                    jsonNode.get("phone").asText(),
-                    userType
-            );
-            //Registramos el usuario
-            userService.registerUser(user);
-            return ResponseEntity.status(HttpStatus.CREATED).build();
+            return register(json);
         }catch(Exception ex){
+            ex.printStackTrace();
             return new ResponseEntity<>(new Message("Error en registro: "+ex.getMessage()), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    private ResponseEntity<?> register(String json) throws TicketException, NoSuchAlgorithmException {
+        JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);
+        String passwordEncrypted = encrypter.encrypt(jsonNode.get("password").asText());
+        UserType userType = userTypeService.getByType(jsonNode.get("userType").asText());
+
+        if(userService.usernameExists(jsonNode.get("username").asText())){
+            throw new TicketException("Usuario ya existe");
+        }
+
+        User user = new User(
+                jsonNode.get("username").asText(),
+                passwordEncrypted,
+                jsonNode.get("name").asText(),
+                jsonNode.get("lastName").asText(),
+                jsonNode.get("phone").asText(),
+                userType
+        );
+        //Registramos el usuario
+        userService.registerUser(user);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**
@@ -137,7 +133,7 @@ public class UserController {
         try{
             JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);
             String username = jsonNode.get("username").asText();
-            String passwordEncrypted = new Encrypter().encrypt(jsonNode.get("password").asText());
+            String passwordEncrypted = encrypter.encrypt(jsonNode.get("password").asText());
             User user = userService.getUser(username);
             if(user.getUsername().equalsIgnoreCase(username) &&
             user.getPassword().equals(passwordEncrypted)){
@@ -160,8 +156,10 @@ public class UserController {
     public ResponseEntity<?> validateJWT(@RequestHeader("Authorization") String authorizationHeader){
         try{
             jwtChecker.checkJWT(authorizationHeader);
-            return ResponseEntity.status(HttpStatus.OK).build();
+            System.out.println("JWT Valido");
+            return new ResponseEntity<>(new Message("Autorizado"), HttpStatus.OK);
         }catch(Exception ex){
+            System.out.println("Sesion invalida");
             return new ResponseEntity<>(new Message("Sesion invalida: ")+ex.getMessage(), HttpStatus.FORBIDDEN);
         }
     }

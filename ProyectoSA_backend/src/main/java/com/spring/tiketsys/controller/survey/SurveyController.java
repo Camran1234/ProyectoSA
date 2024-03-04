@@ -55,7 +55,7 @@ public class SurveyController {
     public ResponseEntity<?> getSurveys(@RequestHeader("Authorization") String authorizationHeader){
         try{
             jwtChecker.checkJWT(authorizationHeader);
-            return new ResponseEntity<>(surveyService.getCsv(), HttpStatus.OK);
+            return new ResponseEntity<>(surveyService.getSurveys(), HttpStatus.OK);
         }catch(Exception ex){
             return  new ResponseEntity<>(new Message("Error al obtener las encuestas"), HttpStatus.BAD_REQUEST);
         }
@@ -65,7 +65,7 @@ public class SurveyController {
     public ResponseEntity<?> getCSV(@RequestHeader("Authorization") String authorizationHeader){
         try{
             jwtChecker.checkJWT(authorizationHeader);
-            List<SurveyDTO> list = surveyService
+            return new ResponseEntity<>(surveyService.getCsv(), HttpStatus.OK);
         }catch(Exception ex){
             return new ResponseEntity<>(new Message("Error en obtener el csv"), HttpStatus.BAD_REQUEST);
         }

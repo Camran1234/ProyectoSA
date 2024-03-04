@@ -4,6 +4,7 @@ import com.spring.tiketsys.dto.ParserEntity;
 import com.spring.tiketsys.dto.entity.compundkeys.History_of_CommunicationId;
 import com.spring.tiketsys.dto.model.History_of_CommunicationDTO;
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.NonNull;
 
 import java.util.Date;
@@ -11,34 +12,65 @@ import java.util.Date;
 @Entity
 @IdClass(History_of_CommunicationId.class)
 @Table(name="History_of_Communication")
+@Data
 public class History_of_Communication implements ParserEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NonNull
     @Column(name = "idHistory")
     private int idHistory;
+
     @Id
     @NonNull
+    @Column(name = "ticketNumber")
     private int ticketNumber;
+
+    @ManyToOne(fetch=FetchType.EAGER)
+    @JoinColumn(name="ticketNumber", referencedColumnName = "ticketNumber", insertable = false, updatable = false)
+    private TicketTracking ticket;
+
     @NonNull
     @Column(name = "dateTimeContacted", columnDefinition = "DATETIME")
     private Date dateTimeContacted;
-    @Column(name="sent", columnDefinition = "TEXT")
+
+    @Column(name = "sent", columnDefinition = "TEXT")
     private String sent;
-    @Column(name="received", columnDefinition = "TEXT")
+
+    @Column(name = "received", columnDefinition = "TEXT")
     private String received;
+
     @NonNull
-    @Column(name="description", columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
+
 
     public History_of_Communication() {
     }
 
-    public History_of_Communication(@NonNull int ticketNumber, @NonNull Date dateTimeContacted, String sent, String received, @NonNull String description) {
+    public History_of_Communication(int idHistory, int ticketNumber, Date dateTimeContacted,
+                                    String sent, String received, String description) {
+        this.idHistory = idHistory;
         this.ticketNumber = ticketNumber;
         this.dateTimeContacted = dateTimeContacted;
         this.sent = sent;
         this.received = received;
         this.description = description;
+
+    }
+
+    public String getReceived() {
+        return received;
+    }
+
+    public void setReceived(String received) {
+        this.received = received;
+    }
+
+    public int getTicket() {
+        return ticketNumber;
+    }
+
+    public void setTicket(int ticket) {
+        this.ticketNumber = ticket;
     }
 
     public int getIdHistory() {
@@ -49,13 +81,7 @@ public class History_of_Communication implements ParserEntity {
         this.idHistory = idHistory;
     }
 
-    public int getTicketNumber() {
-        return ticketNumber;
-    }
 
-    public void setTicketNumber(int ticketNumber) {
-        this.ticketNumber = ticketNumber;
-    }
 
     public Date getDateTimeContacted() {
         return dateTimeContacted;
@@ -94,7 +120,7 @@ public class History_of_Communication implements ParserEntity {
         //int idHistory, int ticketNumber, Date dateTimeContacted, String sent, String received, String description
         return new History_of_CommunicationDTO(
                 this.getIdHistory(),
-                this.getTicketNumber(),
+                this.getTicket(),
                 this.getDateTimeContacted(),
                 this.getSent(),
                 this.getRecieved(),
@@ -111,7 +137,7 @@ public class History_of_Communication implements ParserEntity {
     public String toCSV() {
         StringBuffer string = new StringBuffer();
         string.append(getIdHistory());
-        string.append(getTicketNumber());
+        string.append(getTicket());
         string.append(getDateTimeContacted());
         string.append(getSent());
         string.append(getRecieved());

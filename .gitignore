@@ -29,3 +29,7 @@ replay_pid*
 #Spring data
 *.properties
 *.json
+
+
+#React Vite data
+*.env

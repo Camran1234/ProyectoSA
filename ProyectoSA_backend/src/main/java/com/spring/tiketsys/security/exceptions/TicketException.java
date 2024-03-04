@@ -9,6 +9,6 @@ public class TicketException extends Exception{
     public TicketException() {}
 
     public TicketException(String message){
-        super("Forbidden Mistake: "+message);
+        super(message);
     }
 }

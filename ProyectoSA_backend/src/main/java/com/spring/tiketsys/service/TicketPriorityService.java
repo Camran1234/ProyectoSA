@@ -23,7 +23,7 @@ public class TicketPriorityService {
         throw new TicketException("No se encontro la prioridad del ticket, proporcionado: "+priority);
     }
 
-    public TicketPriority getReferencedById(int id){
-        return ticketPriorityRepository.getReferenceById(id);
+    public TicketPriority findById(int id){
+        return ticketPriorityRepository.findById(id).get();
     }
 }

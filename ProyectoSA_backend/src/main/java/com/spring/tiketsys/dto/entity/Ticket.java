@@ -127,6 +127,11 @@ public class Ticket implements ParserEntity {
 
     @Override
     public TicketDTO parseToDTO() {
+        int ownerIdUser = 0;
+        if(owner != null){
+            ownerIdUser = owner.getIdUser();
+        }
+
         return new TicketDTO(
                 this.ticketNumber,
                 this.email,
@@ -136,7 +141,7 @@ public class Ticket implements ParserEntity {
                 this.description,
                 this.ticketType.getIdTicketProblem(),
                 this.priority.getIdTicketPriority(),
-                this.owner.getIdUser()
+                ownerIdUser
         );
     }
 

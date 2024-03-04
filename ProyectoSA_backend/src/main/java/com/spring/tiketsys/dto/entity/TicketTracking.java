@@ -1,6 +1,8 @@
 package com.spring.tiketsys.dto.entity;
 
+import com.spring.tiketsys.dto.ParserEntity;
 import com.spring.tiketsys.dto.entity.compundkeys.History_of_CommunicationId;
+import com.spring.tiketsys.dto.model.TicketTrackingDTO;
 import jakarta.persistence.*;
 import lombok.NonNull;
 
@@ -8,7 +10,7 @@ import java.util.Date;
 
 @Entity
 @Table(name="TicketTracking")
-public class TicketTracking {
+public class TicketTracking implements ParserEntity {
     @Id
     @NonNull
     @Column(name="ticketNumber")
@@ -20,7 +22,7 @@ public class TicketTracking {
     @NonNull
     private Date dateofCreation;
     @NonNull
-    private Date dateLastUpdation;
+    private Date dateLastUpdate;
     @ManyToOne
     @JoinColumn(name = "agent", referencedColumnName = "idUser")
     private User agent;
@@ -36,7 +38,7 @@ public class TicketTracking {
         this.ticketNumber = ticketNumber;
         this.state = state;
         this.dateofCreation = dateOfCreation;
-        this.dateLastUpdation = dateLastUpdation;
+        this.dateLastUpdate = dateLastUpdation;
         this.agent = agent;
         this.problemSolved = problemSolved;
         this.ticketNumberObject = ticketNumberObject;
@@ -67,11 +69,11 @@ public class TicketTracking {
     }
 
     public Date getDateLastUpdation() {
-        return dateLastUpdation;
+        return dateLastUpdate;
     }
 
     public void setDateLastUpdation(Date dateLastUpdation) {
-        this.dateLastUpdation = dateLastUpdation;
+        this.dateLastUpdate = dateLastUpdation;
     }
 
     public User getAgent() {
@@ -96,5 +98,35 @@ public class TicketTracking {
 
     public void setTicketNumberObject(Ticket ticketNumberObject) {
         this.ticketNumberObject = ticketNumberObject;
+    }
+
+    @Override
+    public TicketTrackingDTO parseToDTO() {
+        int agentId = 0;
+        if(agent != null){
+            agentId = agent.getIdUser();
+        }
+        int stateId = 0;
+        if(agent != null){
+            stateId = state.getIdState();
+        }
+        return new TicketTrackingDTO(
+                ticketNumber,
+                stateId,
+                dateofCreation,
+                dateLastUpdate,
+                agentId,
+                problemSolved
+        );
+    }
+
+    @Override
+    public TicketTracking parseToEntity() {
+        return this;
+    }
+
+    @Override
+    public String toCSV() {
+        return null;
     }
 }

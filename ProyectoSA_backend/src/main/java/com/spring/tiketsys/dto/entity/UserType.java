@@ -8,7 +8,7 @@ import lombok.NonNull;
 public class UserType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="idUserTpe")
+    @Column(name="idUserType")
     private int idUserType;
     @NonNull
     private String type;

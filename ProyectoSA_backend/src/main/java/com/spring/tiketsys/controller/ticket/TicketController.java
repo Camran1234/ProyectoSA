@@ -14,10 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @CrossOrigin
@@ -36,14 +33,26 @@ public class TicketController {
     @Autowired
     History_of_CommunicationService historyOfCommunicationService;
     @Autowired
+    TicketElementService ticketElementService;
+    @Autowired
     JwtChecker jwtChecker;
 
     @PostMapping("/create-ticket")
     public ResponseEntity<?> createTicket(@Validated @RequestBody String json){
         try{
             JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);
-            TicketType ticketType = ticketTypeService.getByType(jsonNode.get("ticketType").asText());
-            TicketPriority ticketPriority = ticketPriorityService.getByPriority(jsonNode.get("ticketPriority").asText());
+            //TicketType ticketType = ticketTypeService.getByType(jsonNode.get("ticketType").asText());
+            TicketType ticketType = ticketTypeService.findById(jsonNode.get("ticketType").asInt());
+            //TicketPriority ticketPriority = ticketPriorityService.getByPriority(jsonNode.get("ticketPriority").asText());
+            TicketPriority ticketPriority = ticketPriorityService.findById(jsonNode.get("ticketPriority").asInt());
+            // Obtener la lista de URLs del campo "urls"
+            JsonNode urlsNode = jsonNode.get("files");
+            List<String> urlsList = new ArrayList<>();
+            for (JsonNode urlNode : urlsNode) {
+                urlsList.add(urlNode.asText());
+            }
+
+            System.out.println("createTicket:"+ticketType.getType());
             Ticket ticket = new Ticket(
                     jsonNode.get("email").asText(),
                     jsonNode.get("name").asText(),
@@ -54,31 +63,49 @@ public class TicketController {
                     ticketPriority,
                     null
             );
-            ticketService.createTicket(ticket);
+            //Creacion del ticket
+            ticket = ticketService.createTicket(ticket);
+            //Create Elements
+            for(String url:urlsList){
+                ticketElementService.saveElement(ticket,url);
+            }
+            //Creacion del tracking
+            State_of_Ticket stateOfTicket = stateOfTicketService.getReferencedById(1);
+            TicketTracking ticketTracking = ticketTrackingService.createTrack(ticket,stateOfTicket);
+
+            //Creacion del historial
             historyOfCommunicationService.saveLog(
-                    ticket.getTicketNumber(),
+                    ticketTracking,
                     "Se creo el ticket de tipo:"+ticket.getTicketType().getType()+", de prioridad:"+ticket.getPriority().getPriority()
             );
-            //Por default el 1 es el estado de nuevo
-            State_of_Ticket stateOfTicket = stateOfTicketService.getReferencedById(1);
-            ticketTrackingService.createTrack(ticket,stateOfTicket);
 
             return ResponseEntity.status(HttpStatus.CREATED).build();
         }catch(Exception ex){
+            ex.printStackTrace();
+            System.out.println("Error: "+ex.getMessage());
             return new ResponseEntity<>(new Message("Error en creacion de tickets: "+ex.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
     @GetMapping("/getTickets")
-    public ResponseEntity<?> getTickets(@Validated @RequestBody String json){
+    public ResponseEntity<?> getTickets(@Validated @RequestParam("email") String email){
         try{
-            JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);
-            String email = jsonNode.get("email").asText();
-            List<TicketDTO> listTokens = ticketService.getTicketsEmail(email);
+            List<Map<String,Object>> listTokens = ticketService.getTicketsEmail(email);
+            List<Map<String, Object>> modifiedList = new ArrayList<>();
+            for (Map<String, Object> map : listTokens) {
+                Map<String, Object> modifiedMap = new HashMap<>(map); // Crear una copia modificable del mapa actual
+                String ticket = modifiedMap.get("ticketNumber").toString();
+                int ticketNumber = Integer.parseInt(ticket);
+                List<String> elements = ticketService.getTicketsElements(ticketNumber);
+                modifiedMap.put("files", elements);
+                modifiedList.add(modifiedMap); // Agregar el mapa modificado a la nueva lista
+            }
+
             Map<String, Object> provider = new HashMap<>();
-            provider.put("tickets", listTokens);
+            provider.put("tickets", modifiedList);
             return new ResponseEntity<>(provider, HttpStatus.OK);
         }catch(Exception ex){
+            ex.printStackTrace();
             return new ResponseEntity<>(new Message("Error obtencion de tickets: "+ex.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
@@ -99,13 +126,13 @@ public class TicketController {
             ticket.setPriority(priority);
             ticketService.createTicket(ticket);
 
-            TicketTracking ticketTracking = ticketTrackingService.getReferencedById(
+            TicketTracking ticketTracking = ticketTrackingService.findById(
                     jsonNode.get("ticketNumber").asInt()
             );
             ticketTracking.setDateLastUpdation(new Date());
-            ticketTrackingService.saveTicket(ticketTracking);
+            ticketTracking = ticketTrackingService.saveTicket(ticketTracking);
             historyOfCommunicationService.saveLog(
-                    jsonNode.get("ticketNumber").asInt(),
+                    ticketTracking,
                     "Se cambio la prioridad del ticket a "+jsonNode.get("priority").asText()
             );
             return ResponseEntity.status(HttpStatus.CREATED).build();

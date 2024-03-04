@@ -62,7 +62,7 @@ public class JwtChecker{
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-            return Long.toString(claims.get("username", Long.class));
+            return claims.get("username", String.class);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -109,9 +109,9 @@ public class JwtChecker{
         if(result== null){
             throw new Exception("Sesion Invalida");
         }
-        long user_id = Long.parseLong(result);
-        if(user_id<=0){
-            throw new JwtException("Error: user_id no reconocible");
+
+        if(result.isEmpty() || result.isBlank()){
+            throw new JwtException("Sesion Invalida");
         }
         /*
         Method only supported if user had a token method

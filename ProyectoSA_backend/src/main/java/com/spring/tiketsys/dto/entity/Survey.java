@@ -14,7 +14,7 @@ public class Survey implements ParserEntity {
     private int idSurvey;
     @NonNull
     @OneToOne
-    @JoinColumn(name = "ticketNumber", referencedColumnName = "idTicketNumber")
+    @JoinColumn(name = "ticketNumber", referencedColumnName = "ticketNumber")
     private Ticket ticketNumber;
     @NonNull
     private int satisfaction;
