@@ -1,0 +1,9 @@
+.message-container {
+    background-color: rgba(0, 0, 0, 0.5); /* Color oscuro cristalino */
+    color: white; /* Texto blanco */
+    padding: 20px; /* Añade relleno para mejorar la legibilidad */
+    font-family: 'Courier New', Courier, monospace;
+    max-width: 60vw;
+    position: relative;
+    margin-right: 55vw;
+}

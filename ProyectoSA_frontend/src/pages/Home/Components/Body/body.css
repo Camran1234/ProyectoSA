@@ -1,0 +1,25 @@
+
+h1 {
+    color: white;
+    font-size: 6vh;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.form.control {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* body.css */
+.btn-styled {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: rgba(254, 254, 254, 0.7); /* Color negro transparente */
+    border-color: rgba(0, 0, 0, 0.7); /* Color del borde */
+    color:black;
+}
+
+.btn-styled:hover {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: rgba(0, 0, 0, 0.9); /* Color negro transparente en hover */
+    border-color: rgba(0, 0, 0, 0.9); /* Color del borde en hover */
+    color:white;
+}

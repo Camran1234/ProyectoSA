@@ -26,3 +26,13 @@ replay_pid*
 #Workbrench
 *.mwb
 *.mwb.bak
+# Intelij configuration
+.idea/
+
+#Spring data
+*.properties
+*.json
+
+
+#React Vite data
+*.env
