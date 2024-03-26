@@ -7,19 +7,32 @@ import com.spring.tiketsys.dto.model.History_of_CommunicationDTO;
 import com.spring.tiketsys.repository.History_of_CommunicationRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class History_of_CommunicationService {
     @Autowired
-    private History_of_CommunicationRepository historyOfCommunicationRepository;
+    private History_of_CommunicationRepository  historyOfCommunicationRepository;
 
+    public History_of_CommunicationDTO saveMessage(int ticketNumber, String message, String sent, Date nowDate){
 
+        int id = generateNextId(ticketNumber);
+        History_of_Communication log = new History_of_Communication(
+            id,
+            ticketNumber,
+            nowDate,
+            sent,
+            "",
+            message
+        );
+        History_of_Communication result = historyOfCommunicationRepository.saveAndFlush(log);
+        return result.parseToDTO();
+    }
+
+    @Transactional
     public void saveLog(TicketTracking ticketNumber, String activity){
         Date nowDate = new Date();
         System.out.println("saveLog: "+ticketNumber.getTicketNumber());
@@ -45,7 +58,13 @@ public class History_of_CommunicationService {
     }
 
 
-    public List<History_of_CommunicationDTO> getLogs(int ticketNumber){
-        return getLogs(ticketNumber);
+
+    public List<Map<String,Object>> getLogs(int ticketNumber){
+        /*List<History_of_Communication> historyOfCommunications = historyOfCommunicationRepository.getLogs(ticketNumber);
+        List<History_of_CommunicationDTO> communicationDTOS = new ArrayList<>();
+        for(History_of_Communication historyOfCommunication: historyOfCommunications){
+            communicationDTOS.add(historyOfCommunication.parseToDTO());
+        }*/
+        return historyOfCommunicationRepository.getLogsNative(ticketNumber);
     }
 }

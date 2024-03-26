@@ -93,7 +93,7 @@ const TicketCreator = () => {
 
     return (
         <div className="container mt-5">
-        <Card className="ticket-card">
+        <Card className="ticket-card" >
             <Card.Body>
             <Card.Title className="text-center" >Crear Nuevo Ticket</Card.Title>
             <Form onSubmit={(e) => handleSubmit(e)}>

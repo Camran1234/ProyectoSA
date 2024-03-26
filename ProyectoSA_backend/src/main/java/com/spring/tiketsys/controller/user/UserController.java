@@ -81,7 +81,8 @@ public class UserController {
     public ResponseEntity<?> registerUserProtected(@Validated @RequestBody String json,
                                                    @RequestHeader("Authorization") String authorizationHeader) {
         try{
-            if (!jwtChecker.initCheck(authorizationHeader)) {
+            if (!jwtChecker.initCheck(authorizationHeader) ||
+                    !jwtChecker.getSubjectType(authorizationHeader).equalsIgnoreCase("3")) {
                 // Registra una sesión inválida
                 return new ResponseEntity<>(new Message("Sesión inválida"), HttpStatus.FORBIDDEN);
             }
@@ -140,6 +141,7 @@ public class UserController {
                 //handle login
                 Map<String, Object> map = new HashMap<>();
                 map.put("username", username);
+                map.put("user_type", String.valueOf(user.getUserType().getIdUserType()));
                 Map<String, Object> response = new HashMap<>();
                 response.put("jwt", jwtProvider.generateToken(username, map));
                 response.put("user_type", user.getUserType());
@@ -160,7 +162,25 @@ public class UserController {
             return new ResponseEntity<>(new Message("Autorizado"), HttpStatus.OK);
         }catch(Exception ex){
             System.out.println("Sesion invalida");
-            return new ResponseEntity<>(new Message("Sesion invalida: ")+ex.getMessage(), HttpStatus.FORBIDDEN);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Message("Sesion invalida: "+ex.getMessage()));
+
+        }
+    }
+
+    @PostMapping("/get-user")
+    public ResponseEntity<?> getUser(@RequestHeader("Authorization") String authorizationHeader){
+        try{
+            jwtChecker.checkJWT(authorizationHeader);
+            System.out.println("JWT Valido");
+            String subject = jwtChecker.getSubject(authorizationHeader);
+            String userType = jwtChecker.getSubjectType(authorizationHeader);
+            Map<String, String> response = new HashMap<>();
+            response.put("user", subject);
+            response.put("userType", userType);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        }catch(Exception ex){
+            System.out.println("Sesion Invalida");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Message("Sesion invalida: "+ex.getMessage()));
         }
     }
 

@@ -1,0 +1,17 @@
+
+.label{
+    color: black;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 0.5rem 0;
+    text-align: center;
+    margin-left: 5rem;
+
+}
+
+.table_col{
+    margin-left: 4rem;
+    margin-right: 4rem ;
+    font-family: 'Courier New', Courier, monospace;
+}

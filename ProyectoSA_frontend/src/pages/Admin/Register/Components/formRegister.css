@@ -1,0 +1,41 @@
+/* ticketCreator.css */
+.ticket-card {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: rgba(0, 0, 0, 0.662); /* Color blanco semi-transparente */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra suave */
+    backdrop-filter: blur(10px); /* Aplica un desenfoque al fondo */
+    -webkit-backdrop-filter: blur(10px); /* Prefijo para compatibilidad con WebKit */
+    height: fit-content; /* Altura del cuadrado */
+    border: 2px solid #000; /* Borde del cuadrado */
+    border-radius: 10px; /* Radio de borde para hacerlo más suave */
+    position: absolute;
+    top: 23%;
+    padding: 20px; /* Espaciado interno dentro del cuadrado */
+    scroll-behavior: smooth;
+    overflow-y: auto;
+  }
+  
+  small {
+    color:red;
+  }
+  
+  .form-label {
+    color:white;
+    font-family: 'Courier New', Courier, monospace;
+  }
+  
+  .form-control{
+    font-family: 'Courier New', Courier, monospace;
+  }
+  
+  .form-select{
+    font-family: 'Courier New', Courier, monospace;
+  }
+  
+  .card-title{
+    font-family: 'Courier New', Courier, monospace;
+    color: white;
+    font-size: xx-large;
+  }
+  
+  

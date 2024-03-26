@@ -18,7 +18,7 @@ export const NavBar = () => {
                 </Nav.Item>
                 <Nav variant="underline" style={{marginTop:"1vh"}} >                    
                     <Nav.Item>
-                        <Nav.Link  href="#" eventKey="link-2">FAQ</Nav.Link>
+                        
                     </Nav.Item>
                     <Nav.Item>
                         <Nav.Link href="/login" eventKey="link-3">CONSOLA</Nav.Link>
@@ -27,7 +27,7 @@ export const NavBar = () => {
                         <NavDropdown.Item  href="/createTicket" eventKey="4.1">CREAR TICKET</NavDropdown.Item>
                         <NavDropdown.Item href="/" eventKey="4.2">RASTREAR TICKET</NavDropdown.Item>
                         <NavDropdown.Divider />
-                        <NavDropdown.Item eventKey="4.4">AYUDA</NavDropdown.Item>
+                        <NavDropdown.Item href="#" eventKey="4.4">FAQ</NavDropdown.Item>
                     </NavDropdown>
                 </Nav>
             </Nav>

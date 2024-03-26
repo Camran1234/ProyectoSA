@@ -44,7 +44,9 @@ public class GCPService {
 
             //Main file is the one to upload
             storage.create(BlobInfo.newBuilder(bucketName, fileName).build(), arrayBytes);
-            String publicLink = storage.get(bucketName, fileName).signUrl(1, TimeUnit.DAYS).toString();
+            //String publicLink = storage.get(bucketName, fileName).signUrl(1, TimeUnit.DAYS).toString();
+            //String publicLink = storage.get(bucketName, fileName).getSelfLink();
+            String publicLink = "https://storage.googleapis.com/" + bucketName + "/" + fileName;
             return publicLink;
         } catch (IOException e) {
             throw new IOException(e.getMessage());

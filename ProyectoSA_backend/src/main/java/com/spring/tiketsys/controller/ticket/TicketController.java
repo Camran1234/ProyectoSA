@@ -5,6 +5,7 @@ import com.spring.tiketsys.config.JsonOptions;
 import com.spring.tiketsys.dto.entity.*;
 import com.spring.tiketsys.dto.model.TicketDTO;
 import com.spring.tiketsys.security.entity.Message;
+import com.spring.tiketsys.security.exceptions.TicketException;
 import com.spring.tiketsys.security.jwt.JwtChecker;
 import com.spring.tiketsys.service.*;
 import org.apache.catalina.mapper.Mapper;
@@ -79,7 +80,7 @@ public class TicketController {
                     "Se creo el ticket de tipo:"+ticket.getTicketType().getType()+", de prioridad:"+ticket.getPriority().getPriority()
             );
 
-            return ResponseEntity.status(HttpStatus.CREATED).build();
+            return ResponseEntity.status(HttpStatus.CREATED).body("{}");
         }catch(Exception ex){
             ex.printStackTrace();
             System.out.println("Error: "+ex.getMessage());
@@ -87,10 +88,28 @@ public class TicketController {
         }
     }
 
+    @GetMapping("/getTickets-all")
+    public ResponseEntity<?> getAllTickets(@RequestHeader("Authorization") String authorizationHeader){
+        try{
+            if (!jwtChecker.initCheck(authorizationHeader)||
+                    !jwtChecker.getSubjectType(authorizationHeader).equalsIgnoreCase("2")) {
+                // Registra una sesión inválida
+                return new ResponseEntity<>(new Message("Sesión inválida"), HttpStatus.FORBIDDEN);
+            }
+            List<Map<String, Object>> tickets = ticketService.getUnsolvedTickets();
+            return ResponseEntity.status(HttpStatus.OK).body(tickets);
+        }catch(Exception ex){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Message("No se pudo obtener los tickets"));
+        }
+    }
+
     @GetMapping("/getTickets")
     public ResponseEntity<?> getTickets(@Validated @RequestParam("email") String email){
         try{
             List<Map<String,Object>> listTokens = ticketService.getTicketsEmail(email);
+            if(listTokens.isEmpty()){
+                throw new TicketException("No se encontraron resultados para "+email);
+            }
             List<Map<String, Object>> modifiedList = new ArrayList<>();
             for (Map<String, Object> map : listTokens) {
                 Map<String, Object> modifiedMap = new HashMap<>(map); // Crear una copia modificable del mapa actual
@@ -110,16 +129,37 @@ public class TicketController {
         }
     }
 
+    @GetMapping("/getTicket-ticketNumber")
+    public ResponseEntity<?> getTicketsByTicketNumber(@Validated @RequestParam("ticketNumber") String ticketNumber){
+        try{
+            Map<String,Object> map = ticketService.getTicketsbyNumber(Integer.parseInt(ticketNumber));
+            if(map.isEmpty()){
+                throw new TicketException("No se encontraron resultados para "+ticketNumber);
+            }
+            Map<String, Object> modifiedMap = new HashMap<>(map); // Crear una copia modificable del mapa actual
+            List<String> elements = ticketService.getTicketsElements(Integer.parseInt(ticketNumber));
+            modifiedMap.put("files", elements);
+
+
+            Map<String, Object> provider = new HashMap<>();
+            provider.put("ticket", modifiedMap);
+            return new ResponseEntity<>(provider, HttpStatus.OK);
+        }catch(Exception ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(new Message("Error obtencion de tickets: "+ex.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @PostMapping("/change-priority")
     public ResponseEntity<?> changeTicketPriority(@Validated @RequestBody String json){
         try{
             JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);
             // Find the new Priority
-            TicketPriority priority = ticketPriorityService.getByPriority(
-                    jsonNode.get("priority").asText()
+            TicketPriority priority = ticketPriorityService.getReferencedById(
+                    jsonNode.get("priority").asInt()
             );
             //Find the ticket
-            Ticket ticket = ticketService.getReferenceById(
+            Ticket ticket = ticketService.findById(
                     jsonNode.get("ticketNumber").asInt()
             );
 
@@ -137,6 +177,7 @@ public class TicketController {
             );
             return ResponseEntity.status(HttpStatus.CREATED).build();
         }catch(Exception ex){
+            ex.printStackTrace();
             return new ResponseEntity<>(new Message("Error en cambio de prioridad en ticket: "+ex.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }

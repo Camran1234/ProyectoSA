@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class TicketTrackingService {
@@ -37,4 +39,7 @@ public class TicketTrackingService {
         return ticketTrackingRepository.saveAndFlush(ticketTracking);
     }
 
+    public List<Map<String, Object>> getAgentTickets(int agent) {
+        return ticketTrackingRepository.getAgentTickets(agent);
+    }
 }

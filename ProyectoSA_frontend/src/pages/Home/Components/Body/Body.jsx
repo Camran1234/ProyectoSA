@@ -14,11 +14,11 @@ const Body = ({setTickets}) => {
         HttpService.get("/api/ticket/getTickets", {email: email})
         .then((response) => {
             setTickets(response.tickets);
-            showSuccessMessage("Exito", "Se encontraron tickets con el correo ingresado");
+            //showSuccessMessage("Exito", "Se encontraron tickets con el correo ingresado");
         })
         .catch((error)=>{
-            showErrorMessage("Error", "No se encontraron tickets con el correo ingresado"+error);
-            console.log(error);
+            showErrorMessage("Error", "No se encontraron tickets con el correo ingresado");
+            
         })
     }
 

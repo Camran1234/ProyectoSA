@@ -7,7 +7,8 @@ HttpService.get = async (api,data) => {
         const url = new URL(API_BACKEND+api);
         if (data) {
             // Convertir el objeto data a una cadena de consulta
-            const queryString = Object.entries(data).map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`).join('&');
+            const queryString = Object.entries(data).map(([key, value]) => 
+            `${encodeURIComponent(key)}=${encodeURIComponent(value)}`).join('&');
             url.search = '?' + queryString;
         }
 
@@ -15,7 +16,7 @@ HttpService.get = async (api,data) => {
         const response = await fetch(url);
         
         if (!response.ok) {
-            throw new Error('La petición no fue exitosa.');
+            throw new Error(await response.json());
         }
         
         // Parsear la respuesta como JSON
@@ -23,13 +24,49 @@ HttpService.get = async (api,data) => {
         return responseData;
     } catch (error) {
         // Manejar errores aquí
-        console.error('Error al hacer la petición GET:', error);
+        console.error('Error! GET: ', JSON.stringify(error));
         throw error;
     }
 }
 
-HttpService.getProtected = async (url, token) => {
+HttpService.getProtected = async (api, data, token) => {
+    try {
+        const url = new URL(API_BACKEND+api);
+        if (data) {            
+            const queryString = Object.entries(data).map(([key, value]) => 
+            `${encodeURIComponent(key)}=${encodeURIComponent(value)}`).join('&');
+            url.search = '?' + queryString;
+        }
 
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`, 
+              'Access-Control-Allow-Origin': '*'
+            }
+          });
+        
+        if (!response.ok || !response.status === 201) {     
+            const responseData = await response.json();                   
+            throw new Error(`${responseData.message}`);
+        }
+        
+        
+        const text = await response.text(); 
+        if (!text.trim()) {
+            
+            return {};
+        }
+        
+        const responseData = JSON.parse(text);
+        return responseData; 
+    } catch (error) {
+        // Manejar errores aquí
+        console.error('Error! GET: ', JSON.stringify(error));
+        throw error;
+    }
 }
 
 HttpService.post = async (api, data) => {
@@ -38,22 +75,29 @@ HttpService.post = async (api, data) => {
         const response = await fetch(url, {
             method: 'POST',
             headers: {
-            'Content-Type': 'application/json', // Asegúrate de ajustar los encabezados según sea necesario
+            'Content-Type': 'application/json', 
             'Access-Control-Allow-Origin': '*'
             },
-            body: JSON.stringify(data) // Convierte los datos a formato JSON
+            body: JSON.stringify(data)
         });
-
-        console.log(response);
-        if (!response.ok || !response.status === 201) {
-            throw new Error(`Error! ${response.json()}`);
+        
+        if (!response.ok || !response.status === 201) {     
+            const responseData = await response.json();                   
+            throw new Error(`${responseData.message}`);
         }
-
-        // Si la solicitud es exitosa, devuelve los datos de la respuesta
-        return response.json(); // Devuelve una promesa que resuelve con los datos de la respuesta en formato JSON
+        
+        
+        const text = await response.text(); 
+        if (!text.trim()) {
+            
+            return {};
+        }
+        
+        const responseData = JSON.parse(text);
+        return responseData; 
     } catch (error) {
-        console.error('Error al realizar la solicitud POST:', error);
-        throw error; // Lanza el error para que sea manejado por el llamador del método
+        //console.error('Error al realizar la solicitud POST:', JSON.stringify(error));
+        throw error; 
     }
 }
 
@@ -69,13 +113,19 @@ HttpService.postProtected = async(api,data,token) => {
           },
           body: JSON.stringify(data)
         });
-  
-        if (!response.ok || !response.status === 201) {
-            console.log("Error! in status "+response.status);
-            throw new Error(`Error! ${response.json()}`);
+        if (!response.ok || !response.status === 201) {     
+            const responseData = await response.json();                   
+            throw new Error(`${responseData.message}`);
         }
-        console.log("Sucess!");        
-        return response.json();
+        
+        
+        const text = await response.text(); 
+        if (!text.trim()) {            
+            return {};
+        }
+        
+        const responseData = JSON.parse(text);
+        return responseData; 
     } catch (error) {
         console.error('Error del servidor:', error);
         throw error;
@@ -95,9 +145,9 @@ HttpService.postFormData = async(api,formData) => {
         console.log("Respuesta: ");
         console.log(response);
         if (!response.ok || !response.status === 201) {
-          throw new Error(`Error! ${response.json()}`);
+          throw new Error(`Error! ${await response.json()}`);
         }        
-        return response.json();
+        return await response.json();
       } catch (error) {
         console.error('Error al realizar la solicitud POST con FormData:', error);
         throw error;

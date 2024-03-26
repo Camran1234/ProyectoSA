@@ -10,8 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+
 import org.springframework.core.io.buffer.DataBuffer;
 
 import java.io.File;
@@ -51,9 +50,10 @@ public class CloudStorageController {
             Map<String, Object> provider = new HashMap<>();
             provider.put("url", url);
             System.out.println("Retornando: "+url);
-            return new ResponseEntity<>(provider, HttpStatus.OK);
+
+            return ResponseEntity.status(HttpStatus.OK).body(provider);
         } catch (Exception e) {
-            return new ResponseEntity<>(new Message("Error! "+e.getMessage()),HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Message("Error!"+e.getMessage()));
         }
     }
 }

@@ -6,8 +6,11 @@ import com.spring.tiketsys.dto.model.History_of_CommunicationDTO;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 @Entity
 @IdClass(History_of_CommunicationId.class)
@@ -115,9 +118,10 @@ public class History_of_Communication implements ParserEntity {
         this.description = description;
     }
 
+    @SneakyThrows
     @Override
     public History_of_CommunicationDTO parseToDTO() {
-        //int idHistory, int ticketNumber, Date dateTimeContacted, String sent, String received, String description
+
         return new History_of_CommunicationDTO(
                 this.getIdHistory(),
                 this.getTicket(),

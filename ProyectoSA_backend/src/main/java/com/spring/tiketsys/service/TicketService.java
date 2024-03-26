@@ -31,11 +31,25 @@ public class TicketService {
     }
 
     @Transactional
+    public Map<String, Object> getTicketsbyNumber(int ticketNumber){
+        Map<String,Object> tickets = ticketRepository.getTicketByTicketNumber(ticketNumber);
+        return tickets;
+    }
+
+    @Transactional
     public List<String> getTicketsElements(int ticketNumber){
         return  ticketElementRepository.getElements(ticketNumber);
     }
 
     public Ticket getReferenceById(int id){
         return ticketRepository.getReferenceById(id);
+    }
+
+    public Ticket findById(int id){
+        return ticketRepository.findById(id).get();
+    }
+
+    public List<Map<String,Object>> getUnsolvedTickets() {
+        return ticketRepository.getUnsolvedTickets();
     }
 }

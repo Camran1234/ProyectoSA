@@ -26,4 +26,7 @@ public class TicketPriorityService {
     public TicketPriority findById(int id){
         return ticketPriorityRepository.findById(id).get();
     }
+
+    public TicketPriority getReferencedById(int id) {return ticketPriorityRepository.getReferenceById(id);}
+
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import secondImg from "../../../../assets/second_body_background.jpg";
 
@@ -7,7 +7,10 @@ import { NavBar } from "../../Components/NavBar/NavBar";
 
 export const Login = () => {
 
-    
+    useEffect(() => {
+
+        document.title = "Ticket System"
+    }, [])
 
     return(
         <div style={{ backgroundImage: `url(${secondImg})`, 

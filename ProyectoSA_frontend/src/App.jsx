@@ -7,6 +7,12 @@ import { Login } from './pages/Home/Client/Login/Login';
 import TicketVisualization from './pages/Home/Client/TicketVisualization/TicketVisualization';
 import { ProtectedRouteLogin } from './interceptors/ProtectedRouteLogin';
 import PrivateRoute from './interceptors/PrivateRoute';
+import { HomeAdmin } from './pages/Admin/Home/HomeAdmin';
+import { RegisterAdmin } from './pages/Admin/Register/RegisterAdmin';
+import { HomeAgent } from './pages/Agent/Home/HomeAgent';
+import { TicketControl } from './pages/Agent/TicketControl/TicketControl';
+import { AgentControl } from './pages/Agent/AgentControl/AgentControl';
+
 
 function App() {
 
@@ -28,11 +34,18 @@ function App() {
           </Route>
 
           {
-          //Para el admin y el agente
+          //Para el admin y el agente register-agent
           }
-          <Route element={<PrivateRoute redirectTo="/login" allowedRoles={[3,2]} />}>
-            <Route path="/admin" element={<Home />} />
-            <Route path="/agente" element={<Home />} />
+          <Route element={<PrivateRoute redirectTo="/login" allowedRoles={[2]} />}>
+            
+            <Route path="/agente" element={<HomeAgent />} />
+            <Route path="/agente/ticket-control" element={<TicketControl />} />
+            <Route path="/agente/ticket-attend" element={<AgentControl />} />
+          </Route>
+
+          <Route element={<PrivateRoute redirectTo="/login" allowedRoles={[3]} />}>
+            <Route path="/admin" element={<HomeAdmin />} />
+            <Route path="/admin/register" element={<RegisterAdmin />} />
           </Route>
 
           

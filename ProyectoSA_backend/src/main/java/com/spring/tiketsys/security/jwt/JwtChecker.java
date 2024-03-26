@@ -1,5 +1,7 @@
 package com.spring.tiketsys.security.jwt;
 
+import com.spring.tiketsys.dto.entity.User;
+import com.spring.tiketsys.dto.entity.UserType;
 import com.spring.tiketsys.security.exceptions.TicketException;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +54,16 @@ public class JwtChecker{
      * @param token
      * @return
      */
-    public String getSubject(String token) throws NoSuchAlgorithmException {
+    public String getSubject(String token)  {
+        return getClaim(token, "username");
+    }
+
+    public String getSubjectType(String token){
+        String userType = getClaim(token, "user_type");
+        return userType;
+    }
+
+    private String getClaim(String token, String claim) {
         try {
             token = token.split(" ")[1].trim();
             byte[] secretBytes = secret.getBytes(StandardCharsets.UTF_8);
@@ -62,7 +73,7 @@ public class JwtChecker{
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-            return claims.get("username", String.class);
+            return claims.get(claim, String.class);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

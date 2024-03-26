@@ -4,6 +4,9 @@
     padding: 20px; /* Añade relleno para mejorar la legibilidad */
     font-family: 'Courier New', Courier, monospace;
     max-width: 30vw;
-    position: relative;
+    max-height: 75vh;
+    position: absolute;
     margin-left: 2vw;
+    overflow-y: auto;
+    
 }
