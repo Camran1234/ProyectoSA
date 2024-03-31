@@ -7,9 +7,8 @@ spec:
     app: spring-service
   ports:
     - protocol: TCP
-      port: 33065
+      port: 80
       targetPort: 33065
-  type: LoadBalancer
 
 ---
 apiVersion: apps/v1
@@ -28,9 +27,9 @@ spec:
     spec:
       containers:
         - name: spring-service
-          image: camranjuntinase/sa_pr:proyectosa_backend
+          image: camranjuntinase/sa_pr:proyectosa_backend_1.0.5
           ports:
-            - containerPort: 33065
+            - containerPort: 33065  # Puerto de tu aplicación Spring
 
 ---
 apiVersion: v1
@@ -97,30 +96,52 @@ spec:
     spec:
       containers:
         - name: react-service
-          image: camranjuntinase/sa_pr:proyectosa_frontendVV1
+          image: camranjuntinase/sa_pr:proyectosa_frontend_1.0.5
           ports:
             - containerPort: 5173
 
 ---
+#apiVersion: networking.k8s.io/v1
+#kind: Ingress
+#metadata:
+#  name: spring-ingress-ext
+#  namespace: default
+#  annotations:
+#    kubernetes.io/ingress.global-static-ip-name: dev-static-ip
+#spec:
+#  defaultBackend:
+#    service:
+#      name: spring-service
+#      port:
+#        number: 80
+#status:
+  #loadBalancer: {}
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: frontend-ingress
+  name: spring-ingress-ext
+  namespace: default
   annotations:
-    kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/ingress.global-static-ip-name: dev-static-ip
 spec:
-  ingressClassName: "nginx"
   rules:
-    - host: tikcetsys-asd.xyz  # Aquí se especifica el host
+    - host: dev-enviroment.ticketsys-asd.xyz
       http:
         paths:
-          - path: /
-            pathType: Prefix
+          - pathType: Prefix
+            path: /
             backend:
               service:
-                name: react-service
+                name: spring-service
                 port:
-                  number: 5173
-
+                  number: 80
+  defaultBackend:
+    service:
+      name: spring-service
+      port:
+        number: 80
+status:
+  loadBalancer: {}
 
           
