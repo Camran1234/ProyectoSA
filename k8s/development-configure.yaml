@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: spring-service
-          image: camranjuntinase/sa_pr:proyectosa_backend_1.0.5
+          image: camranjuntinase/sa_pr:proyectosa_backend_2.0.1
           ports:
             - containerPort: 33065  # Puerto de tu aplicación Spring
 
@@ -96,7 +96,7 @@ spec:
     spec:
       containers:
         - name: react-service
-          image: camranjuntinase/sa_pr:proyectosa_frontend_1.0.5
+          image: camranjuntinase/sa_pr:proyectosa_frontend_2.0.1
           ports:
             - containerPort: 5173
 

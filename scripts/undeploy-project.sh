@@ -1,4 +1,5 @@
 #!/bin/bash
 
 # Baja los deployments
-kubectl delete -f ../k8s/connection.yaml
+cd ../
+kubectl delete -f k8s/development-configure.yaml
