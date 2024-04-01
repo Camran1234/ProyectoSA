@@ -13,6 +13,7 @@ import { HomeAgent } from './pages/Agent/Home/HomeAgent';
 import { TicketControl } from './pages/Agent/TicketControl/TicketControl';
 import { AgentControl } from './pages/Agent/AgentControl/AgentControl';
 import { Register } from './pages/Home/Register/Register';
+import { Controller } from './pages/Admin/Controller/Controller';
 
 
 function App() {
@@ -60,6 +61,7 @@ function App() {
           <Route element={<PrivateRoute redirectTo="/login" allowedRoles={[3]} />}>
             <Route path="/admin" element={<HomeAdmin />} />
             <Route path="/admin/register" element={<RegisterAdmin />} />
+            <Route path="admin/controller" element={<Controller />} />
           </Route>
 
           

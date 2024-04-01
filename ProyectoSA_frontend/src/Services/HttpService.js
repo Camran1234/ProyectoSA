@@ -132,6 +132,37 @@ HttpService.postProtected = async(api,data,token) => {
     }
 }
 
+HttpService.deleteProtected = async(api,data,token) => {
+    try {
+        const url = API_BACKEND+api;
+        const response = await fetch(url, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`, // Incluye el token de autorización en el encabezado
+            'Access-Control-Allow-Origin': '*'
+          },
+          body: JSON.stringify(data)
+        });
+        if (!response.ok || !response.status === 201) {     
+            const responseData = await response.json();                   
+            throw new Error(`${responseData.message}`);
+        }
+        
+        
+        const text = await response.text(); 
+        if (!text.trim()) {            
+            return {};
+        }
+        
+        const responseData = JSON.parse(text);
+        return responseData; 
+    } catch (error) {
+        console.error('Error del servidor:', error);
+        throw error;
+    }
+}
+
 HttpService.postFormData = async(api,formData) => {
     try {
         const url = API_BACKEND+api;

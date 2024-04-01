@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS `ticketDB`.`User` (
   `lastName` VARCHAR(200) NOT NULL,
   `phone` VARCHAR(30) NOT NULL,
   `userType` INT NOT NULL,
+  `blocked` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`idUser`),
   INDEX `fx_User_UserType_userTpe_idx` (`userType` ASC) VISIBLE,
   CONSTRAINT `fx_User_UserType_userTpe`

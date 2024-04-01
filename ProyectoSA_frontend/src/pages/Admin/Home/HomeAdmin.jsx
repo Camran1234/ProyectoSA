@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { NavBar } from "../NavBar/NavBar";
-import './home.css';
+import './homeAdmin.css';
 import { HttpService } from "../../../Services/HttpService";
 import { getToken } from "../../../Services/userHandler";
 
@@ -19,18 +19,17 @@ export const HomeAdmin = () => {
     }, [])
 
     return (
-        <div className="homeContainer">
+        <div className="adminContainer">
             <NavBar />            
             <div style={{
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
                 height: '25vh',
-                fontFamily: 'Courier New'
-
+                fontFamily: 'Courier New, Courier, monospace',                
             
             }}>
-                <h1>Bienvenido {user}</h1>
+                <h1 style={{color:'black'}}>Bienvenido {user}</h1>
             </div>
         </div >
     )

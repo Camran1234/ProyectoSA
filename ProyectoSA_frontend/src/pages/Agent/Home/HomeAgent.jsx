@@ -26,7 +26,7 @@ export const HomeAgent = () => {
                 justifyContent: 'center',
                 alignItems: 'center',
                 height: '25vh',
-                fontFamily: 'Courier New'
+                fontFamily: 'Courier New, Courier, monospace'
 
             
             }}>

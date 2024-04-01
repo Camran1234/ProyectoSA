@@ -16,10 +16,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Mono;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -109,12 +109,26 @@ public class UserController {
                 jsonNode.get("name").asText(),
                 jsonNode.get("lastName").asText(),
                 jsonNode.get("phone").asText(),
-                userType
+                userType,
+                false
         );
         //Registramos el usuario
         userService.registerUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+
+    @PostMapping("/get-users")
+    public ResponseEntity<?> getUsers(@RequestHeader("Authorization") String authorizationHeader){
+        try{
+            jwtChecker.checkJWT(authorizationHeader);
+            List<Map<String, Object>> users = userService.getAllSecure(jwtChecker.getSubject(authorizationHeader));
+            return ResponseEntity.status(HttpStatus.OK).body(users);
+        }catch(Exception ex){
+            return new ResponseEntity<>(new Message("usuario o contraseña inválidos"), HttpStatus.NOT_ACCEPTABLE);
+        }
+    }
+
 
     /**
      * Provide:{
@@ -136,6 +150,11 @@ public class UserController {
             String username = jsonNode.get("username").asText();
             String passwordEncrypted = encrypter.encrypt(jsonNode.get("password").asText());
             User user = userService.getUser(username);
+
+            if(user.isBlocked()){
+                throw new TicketException("el usuario esta bloqueado");
+            }
+
             if(user.getUsername().equalsIgnoreCase(username) &&
             user.getPassword().equals(passwordEncrypted)){
                 //handle login
@@ -150,7 +169,58 @@ public class UserController {
                 throw new TicketException("El usuario o la contraseña son incorrectos");
             }
         }catch(Exception ex){
-            return new ResponseEntity<>(new Message("Error en Inicio de sesion: "+ex.getMessage()), HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity<>(new Message(ex.getMessage()), HttpStatus.NOT_ACCEPTABLE);
+        }
+    }
+
+    /**
+     * Provided {
+     *     username (String)
+     *     blocked (int)
+     * }
+     * @param authorizationHeader
+     * @param json
+     * @return
+     */
+    @PostMapping("/changeBlock")
+    public ResponseEntity<?> changeBlockUser(@RequestHeader("Authorization") String authorizationHeader,
+                                             @Validated @RequestBody String json){
+        try{
+            jwtChecker.checkJWT(authorizationHeader);
+            JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);
+            String username = jsonNode.get("username").asText();
+            boolean blocked = (jsonNode.get("blocked").asInt() == 1);
+            User user = userService.getUser(username);
+            user.setBlocked(blocked);
+            userService.registerUser(user);
+            return ResponseEntity.status(HttpStatus.OK).body("{}");
+        }catch(Exception ex){
+            ex.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Message(ex.getMessage()));
+        }
+    }
+
+    /**
+     * Provided: {
+     *     username
+     * }
+     * @param authorizationHeader
+     * @param json
+     * @return
+     */
+    @DeleteMapping("/delete-user")
+    public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String authorizationHeader,
+                                             @Validated @RequestBody String json){
+        try{
+            jwtChecker.checkJWT(authorizationHeader);
+            JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);
+            String username = jsonNode.get("username").asText();
+            User user = userService.getUser(username);
+            userService.deleteUser(user);
+            return ResponseEntity.status(HttpStatus.OK).body("{}");
+        }catch(Exception ex){
+            ex.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Message(ex.getMessage()));
         }
     }
 
