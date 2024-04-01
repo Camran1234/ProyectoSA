@@ -15,21 +15,13 @@ export const NavBar = () => {
                         SISTEMA DE TICKETS
                         </div>
                     </Nav.Link>
-                </Nav.Item>
-                <Nav variant="underline" style={{marginTop:"1vh"}} >                    
+                </Nav.Item>  
+                
+                <Nav variant="underline" style={{marginTop:"1vh", marginRight: "1vw"}} >                                                            
                     <Nav.Item>
-                        
+                        <Nav.Link eventKey="link-2">FAQ</Nav.Link>
                     </Nav.Item>
-                    <Nav.Item>
-                        <Nav.Link href="/login" eventKey="link-3">CONSOLA</Nav.Link>
-                    </Nav.Item>
-                    <NavDropdown title="TICKET" id="nav-dropdown" style={{marginRight:"5vw"}}>
-                        <NavDropdown.Item  href="/createTicket" eventKey="4.1">CREAR TICKET</NavDropdown.Item>
-                        <NavDropdown.Item href="/" eventKey="4.2">RASTREAR TICKET</NavDropdown.Item>
-                        <NavDropdown.Divider />
-                        <NavDropdown.Item href="#" eventKey="4.4">FAQ</NavDropdown.Item>
-                    </NavDropdown>
-                </Nav>
+                </Nav>              
             </Nav>
         </div>
     );

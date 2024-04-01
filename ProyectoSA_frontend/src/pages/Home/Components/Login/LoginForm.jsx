@@ -19,11 +19,11 @@ const LoginForm = () => {
             cookies.set("crr_user", {...response,user:username}, { path: "/" });
             /**
              * {"user_type":{"idUserType":3,"type":"administrador"},
-             * "jwt":"here goes token"}
+          ProyectoSA_frontend/src/pages/Client/Components/Login   * "jwt":"here goes token"}
              */
             const userRole = response.user_type.idUserType;
             if(userRole === 1){
-                navigate("/");
+                navigate("/home");
             }else if(userRole === 2){
                 navigate("/agente");
             }else if(userRole === 3){
@@ -58,6 +58,9 @@ const LoginForm = () => {
                     required/>                            
                 </Form.Group>
 
+                <small style={{color:'rgba(255,255,255,0.5)'}}>
+                    ¿No tienes cuenta? <a style={{color:'rgba(255,255,255,0.5)'}} href="/register">Registrate</a>
+                </small>                
 
                 <div className="text-center mt-3"> {/* Centra el contenido y agrega un margen superior */}
                     <Button variant="dark" type="submit" className="btn-lg btn-styled" >Ingresar</Button> {/* Utiliza variant="dark" para el color negro */}

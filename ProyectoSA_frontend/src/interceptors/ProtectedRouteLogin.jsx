@@ -38,7 +38,7 @@ export const ProtectedRouteLogin = ({ redirectTo }) => {
             return <Outlet />;
         } else {
             if (crr_user.user_type.idUserType == 1) {
-            redirectTo = "/";
+            redirectTo = "/home";
             } else if (crr_user.user_type.idUserType == 2) {
             redirectTo = "/agente";
             }else if (crr_user.user_type.idUserType == 3) {

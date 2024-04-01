@@ -1,10 +1,10 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { SesionProvider } from './context/sesion'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Home } from './pages/Home/Home';
-import { CreateTicket } from './pages/Home/Client/TicketCreation/CreateTicket';
-import { Login } from './pages/Home/Client/Login/Login';
-import TicketVisualization from './pages/Home/Client/TicketVisualization/TicketVisualization';
+import { Home } from './pages/Client/Home';
+import { CreateTicket } from './pages/Client/Client/TicketCreation/CreateTicket';
+import { Login } from './pages/Home/Login/Login';
+import TicketVisualization from './pages/Client/Client/TicketVisualization/TicketVisualization';
 import { ProtectedRouteLogin } from './interceptors/ProtectedRouteLogin';
 import PrivateRoute from './interceptors/PrivateRoute';
 import { HomeAdmin } from './pages/Admin/Home/HomeAdmin';
@@ -12,6 +12,7 @@ import { RegisterAdmin } from './pages/Admin/Register/RegisterAdmin';
 import { HomeAgent } from './pages/Agent/Home/HomeAgent';
 import { TicketControl } from './pages/Agent/TicketControl/TicketControl';
 import { AgentControl } from './pages/Agent/AgentControl/AgentControl';
+import { Register } from './pages/Home/Register/Register';
 
 
 function App() {
@@ -21,16 +22,29 @@ function App() {
       <SesionProvider>
         <Routes>
           
-          <Route index path="/" element={<Home />} />
-          <Route path="/createTicket" element={<CreateTicket />} />          
-          <Route path="/seekTicket" element={<TicketVisualization />} />
-
+          {
+          //<Route index path="/" element={<Home />} />
+          }        
+          <Route element={<PrivateRoute redirectTo="/login" allowedRoles={[1,3]} />}>
+            <Route path="/seekTicket" element={<TicketVisualization />} />
+          </Route>
           {
             //Para redirigir del login al correspondiente si ya hay sesion
           }
 
           <Route element={<ProtectedRouteLogin redirectTo="/" />}>
-            <Route path="/login" element={<Login />} />            
+            <Route path="/login" element={<Login />} />
+            <Route index path="/" element={<Login />} />            
+          </Route>
+          <Route path="/register" element={<Register />} />
+
+          { 
+          //Para el cliente
+          }
+          <Route element={<PrivateRoute redirectTo="/login" allowedRoles={[1]} />}>
+            <Route path="/home" element={<Home />} />
+            <Route path="/createTicket" element={<CreateTicket />} />
+            <Route path="/find-ticket" element={<Home />} />
           </Route>
 
           {
