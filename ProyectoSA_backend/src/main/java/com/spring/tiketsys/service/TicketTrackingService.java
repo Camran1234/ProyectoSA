@@ -19,6 +19,9 @@ public class TicketTrackingService {
     public TicketTracking findById(int id){
         return  ticketTrackingRepository.findById(id).get();
     }
+    public TicketTracking getReferenceById(int id){
+        return ticketTrackingRepository.getReferenceById(id);
+    }
 
 
     public TicketTracking saveTicket(TicketTracking ticketTracking){
@@ -42,4 +45,6 @@ public class TicketTrackingService {
     public List<Map<String, Object>> getAgentTickets(int agent) {
         return ticketTrackingRepository.getAgentTickets(agent);
     }
+
+
 }

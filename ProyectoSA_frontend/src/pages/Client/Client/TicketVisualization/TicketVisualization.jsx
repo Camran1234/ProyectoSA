@@ -27,7 +27,7 @@ const TicketVisualization = () => {
             }));
         }
 
-        if(getToken() && getUserType() === 'agent'){            
+        if(getToken() && getUserType() === 'agente'){            
             setAgent(true);            
         }
     }, [ticket]);

@@ -37,6 +37,12 @@ public class TicketService {
     }
 
     @Transactional
+    public List<Map<String, Object>> getTicketsWithoutSurvey(int subject){
+        List<Map<String,Object>> tickets = ticketRepository.getTicketsWithoutSurvey(subject);
+        return tickets;
+    }
+
+    @Transactional
     public Map<String, Object> getTicketsbyNumber(int ticketNumber){
         Map<String,Object> tickets = ticketRepository.getTicketByTicketNumber(ticketNumber);
         return tickets;

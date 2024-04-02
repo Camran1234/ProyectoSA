@@ -3,6 +3,10 @@
     color: white;
 }
 
+.card-subtitle{
+    font-size: 125%;
+}
+
 .containerTickets{
     position: absolute;
     left: 10%;
@@ -33,4 +37,18 @@
 
 .custom-button:hover {
     background-color: darkblue; /* Cambia el color de fondo cuando el botón se encuentra en estado de hover */
+}
+
+.custom-accept-button {
+    /* Agrega tus estilos personalizados aquí */
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: small;
+    font-weight: bolder;
+    background-color: green;
+    border-color: green; /* Cambia el color del borde si lo necesitas */
+}
+
+.custom-accept-button:hover {
+    background-color: darkgreen; /* Cambia el color de fondo cuando el botón se encuentra en estado de hover */
 }
