@@ -10,6 +10,7 @@ import { getToken } from '../../../../Services/userHandler';
 import { HttpService } from '../../../../Services/HttpService';
 import { NavBar as NavBarAgent } from '../../../Agent/NavBar/NavBar';
 import { NavBar } from '../../Components/NavBar/NavBar';
+import { getUserType } from '../../../../interceptors/CookieHandler';
 const TicketVisualization = () => {
     const {state} = useLocation();
     const [ticket, setTicket] = useState(state?.ticket);
@@ -26,10 +27,8 @@ const TicketVisualization = () => {
             }));
         }
 
-        if(getToken()){
-
-            setAgent(true);
-            
+        if(getToken() && getUserType() === 'agent'){            
+            setAgent(true);            
         }
     }, [ticket]);
 

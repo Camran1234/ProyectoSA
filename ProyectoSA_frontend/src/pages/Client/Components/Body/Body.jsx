@@ -1,17 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Button } from "react-bootstrap";
 import './body.css';
 import { HttpService } from "../../../../Services/HttpService";
 import { showErrorMessage, showSuccessMessage } from "../../../../components/Alerts/SweetAlertComponent";
+import { getToken } from "../../../../Services/userHandler";
 
 const Body = ({setTickets}) => {
     const [email, setEmail] = useState("");
-
+    
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        HttpService.get("/api/ticket/getTickets", {email: email})
+        HttpService.getProtected("/api/ticket/getTickets", {email: email}, getToken())
         .then((response) => {
             setTickets(response.tickets);
             //showSuccessMessage("Exito", "Se encontraron tickets con el correo ingresado");

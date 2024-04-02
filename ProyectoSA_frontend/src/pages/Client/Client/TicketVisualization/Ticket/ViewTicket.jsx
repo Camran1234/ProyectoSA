@@ -24,7 +24,7 @@ const ViewTicket = ({ ticket, agent }) => {
         return (        
             <p key={index}><strong>Archivo {index+1}:</strong> {ticket.problemSolved==0 ?
             <>
-                <a href={file}>descargar</a>
+                <a style={{color:'white'}} href={file}>descargar</a>
             </>
             : null
             }</p>                            
@@ -101,6 +101,7 @@ const ViewTicket = ({ ticket, agent }) => {
                 <Col className="offset-md-1"> {/* Utiliza offset-md-3 para mover el contenedor a la izquierda */}
                     <h2>Información del Ticket</h2>
                     <p><strong>Número de ticket:</strong> {ticket.ticketNumber}</p>
+                    <p><strong>Correo registrado:</strong> {ticket.email}</p>
                     <p><strong>Estado del ticket:</strong> {ticket.state==1 ?
                         <>
                             Nuevo

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import './createTicket.css';
 import { HttpService } from "../../../../Services/HttpService";
 import { showErrorMessage, showSuccessMessage } from "../../../../components/Alerts/SweetAlertComponent";
+import { getToken } from "../../../../Services/userHandler";
 
 const TicketCreator = () => {
     const navigate = useNavigate();
@@ -76,7 +77,7 @@ const TicketCreator = () => {
                 };
     
                 // Crear el ticket
-                return HttpService.post("/api/ticket/create-ticket", data);
+                return HttpService.postProtected("/api/ticket/create-ticket", data, getToken());
             })
             .then((response) => {
                 // Manejar la respuesta del ticket creado

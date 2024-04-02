@@ -3,8 +3,16 @@ import { Nav, NavDropdown } from "react-bootstrap";
 import viteLogo from '/vite.svg'
     import './navLink.css'
 import { removeSession } from "../../../../interceptors/CookieHandler";
+import { useNavigate } from "react-router-dom";
 
 export const NavBar = () => {
+    const navigate = useNavigate()    
+
+    const handleAutosearch = () => {
+        navigate('/find-ticket', { state: { search: true } });
+        window.location.reload();
+    }
+
     return (
         <div className="custom-navbar" >
             <Nav className="justify-content-between">
@@ -20,7 +28,7 @@ export const NavBar = () => {
                 <Nav variant="underline" style={{marginTop:"1vh"}} >                                        
                     <NavDropdown title="TICKET" id="nav-dropdown" >
                         <NavDropdown.Item  href="/createTicket" eventKey="2.1">CREAR TICKET</NavDropdown.Item>
-                        <NavDropdown.Item href="/find-ticket" eventKey="2.2">RASTREAR TICKET</NavDropdown.Item>
+                        <NavDropdown.Item onClick={() => handleAutosearch()} eventKey="2.2">RASTREAR TICKETS</NavDropdown.Item>
                         <NavDropdown.Divider />
                         <NavDropdown.Item href="#" eventKey="2.3">FAQ</NavDropdown.Item>
                     </NavDropdown>

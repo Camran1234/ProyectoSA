@@ -122,6 +122,7 @@ CREATE TABLE IF NOT EXISTS `ticketDB`.`TicketTracking` (
   `dateLastUpdate` DATE NULL,
   `agent` INT NULL,
   `problemSolved` TINYINT NOT NULL,
+  `surveyAvailable` TINYINT NOT NULL,
   PRIMARY KEY (`ticketNumber`),
   INDEX `fx_Ticket_State_of_Ticket_state_idx` (`state` ASC) VISIBLE,
   INDEX `fx_TicketTracking_User_agent_idx` (`agent` ASC) VISIBLE,
