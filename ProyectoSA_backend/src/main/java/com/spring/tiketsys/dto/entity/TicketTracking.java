@@ -28,6 +28,7 @@ public class TicketTracking implements ParserEntity {
     private User agent;
     @NonNull
     private boolean problemSolved;
+    private boolean surveyAvailable;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="ticketNumber", referencedColumnName = "ticketNumber", insertable = false, updatable = false)
     private Ticket ticketNumberObject;
@@ -128,5 +129,13 @@ public class TicketTracking implements ParserEntity {
     @Override
     public String toCSV() {
         return null;
+    }
+
+    public boolean isSurveyAvailable() {
+        return surveyAvailable;
+    }
+
+    public void setSurveyAvailable(boolean surveyAvailable) {
+        this.surveyAvailable = surveyAvailable;
     }
 }

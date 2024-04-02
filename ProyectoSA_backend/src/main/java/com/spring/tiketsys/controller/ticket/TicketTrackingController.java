@@ -79,6 +79,8 @@ public class TicketTrackingController {
                     jsonNode.get("ticketNumber").asInt()
             );
             ticketTracking.setProblemSolved(true);
+            State_of_Ticket state = stateOfTicketService.getByState("cerrado");
+            ticketTracking.setState(state);
             ticketTracking.setDateLastUpdation(new Date());
             ticketTracking=ticketTrackingService.saveTicket(ticketTracking);
             historyOfCommunicationService.saveLog(

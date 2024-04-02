@@ -29,8 +29,9 @@ export const NavBar = () => {
                     <NavDropdown title="TICKET" id="nav-dropdown" >
                         <NavDropdown.Item  href="/createTicket" eventKey="2.1">CREAR TICKET</NavDropdown.Item>
                         <NavDropdown.Item onClick={() => handleAutosearch()} eventKey="2.2">RASTREAR TICKETS</NavDropdown.Item>
+                        <NavDropdown.Item  href="/surveyTickets" eventKey="2.3">CALIFICACIÓN DE SERVICIO DE CALIDAD</NavDropdown.Item>
                         <NavDropdown.Divider />
-                        <NavDropdown.Item href="#" eventKey="2.3">FAQ</NavDropdown.Item>
+                        <NavDropdown.Item href="#" eventKey="2.4">FAQ</NavDropdown.Item>
                     </NavDropdown>
                     <Nav.Item>
                         <Nav.Link onClick={() => removeSession()} eventKey="link-3">CERRAR SESIÓN</Nav.Link>

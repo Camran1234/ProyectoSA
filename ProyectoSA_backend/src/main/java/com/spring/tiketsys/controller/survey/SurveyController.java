@@ -5,11 +5,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.spring.tiketsys.config.JsonOptions;
 import com.spring.tiketsys.dto.entity.Survey;
 import com.spring.tiketsys.dto.entity.Ticket;
+import com.spring.tiketsys.dto.entity.TicketTracking;
 import com.spring.tiketsys.dto.model.SurveyDTO;
 import com.spring.tiketsys.security.entity.Message;
 import com.spring.tiketsys.security.jwt.JwtChecker;
 import com.spring.tiketsys.service.SurveyService;
 import com.spring.tiketsys.service.TicketService;
+import com.spring.tiketsys.service.TicketTrackingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,14 +29,22 @@ public class SurveyController {
     @Autowired
     TicketService ticketService;
     @Autowired
+    TicketTrackingService ticketTrackingService;
+    @Autowired
     JwtChecker jwtChecker;
 
+
     @PostMapping("/saveSurvey")
-    public ResponseEntity<?> responseSurver(@Validated @RequestBody String json){
+    public ResponseEntity<?> responseSurvey(@RequestHeader("Authorization") String authorizationHeader,
+                                            @Validated @RequestBody String json){
         try{
+            System.out.println("Iniciando saveSurvey");
+            jwtChecker.checkJWT(authorizationHeader);
             JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);
             int ticketNumber = jsonNode.get("ticketNumber").asInt();
             Ticket ticket = ticketService.getReferenceById(ticketNumber);
+            TicketTracking ticketTracking = ticketTrackingService.findById(ticketNumber);
+            ticketTracking.setSurveyAvailable(true);
             int satisfaction = jsonNode.get("satisfaction").asInt();
             int timeService = jsonNode.get("timeService").asInt();
             int qualityService = jsonNode.get("qualityService").asInt();
@@ -45,8 +55,11 @@ public class SurveyController {
                     qualityService
             );
             surveyService.saveSurvey(survey);
+            ticketTrackingService.saveTicket(ticketTracking);
             return ResponseEntity.status(HttpStatus.OK).build();
         }catch(Exception ex){
+            ex.printStackTrace();
+            System.out.println("Error! "+ex.getMessage());
             return new ResponseEntity<>(new Message("Error en la respuesta de la encuesta :"+ ex.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }

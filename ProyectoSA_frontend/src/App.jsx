@@ -14,6 +14,7 @@ import { TicketControl } from './pages/Agent/TicketControl/TicketControl';
 import { AgentControl } from './pages/Agent/AgentControl/AgentControl';
 import { Register } from './pages/Home/Register/Register';
 import { Controller } from './pages/Admin/Controller/Controller';
+import { SearchTicketSurvey } from './pages/Client/Client/SearchTicketSurvey/SearchTicketSurvey';
 
 
 function App() {
@@ -26,7 +27,7 @@ function App() {
           {
           //<Route index path="/" element={<Home />} />
           }        
-          <Route element={<PrivateRoute redirectTo="/login" allowedRoles={[1,3]} />}>
+          <Route element={<PrivateRoute redirectTo="/login" allowedRoles={[1,2]} />}>
             <Route path="/seekTicket" element={<TicketVisualization />} />
           </Route>
           {
@@ -46,6 +47,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/createTicket" element={<CreateTicket />} />
             <Route path="/find-ticket" element={<Home />} />
+            <Route path="/surveyTickets" element={<SearchTicketSurvey />} />
           </Route>
 
           {

@@ -165,6 +165,35 @@ public class TicketController {
         }
     }
 
+    @GetMapping("/getTickets-no-survey")
+    public ResponseEntity<?> getTicketsWithoutSurvey(@RequestHeader("Authorization") String authorizationHeader){
+        try{
+            jwtChecker.checkJWT(authorizationHeader);
+            System.out.println(jwtChecker.getSubject(authorizationHeader));
+            User user = userService.getUser(jwtChecker.getSubject(authorizationHeader));
+            List<Map<String,Object>> listTokens = ticketService.getTicketsWithoutSurvey(user.getIdUser());
+            if(listTokens.isEmpty()){
+                throw new TicketException("No se encontraron resultados para "+jwtChecker.getSubject(authorizationHeader));
+            }
+            List<Map<String, Object>> modifiedList = new ArrayList<>();
+            for (Map<String, Object> map : listTokens) {
+                Map<String, Object> modifiedMap = new HashMap<>(map); // Crear una copia modificable del mapa actual
+                String ticket = modifiedMap.get("ticketNumber").toString();
+                int ticketNumber = Integer.parseInt(ticket);
+                List<String> elements = ticketService.getTicketsElements(ticketNumber);
+                modifiedMap.put("files", elements);
+                modifiedList.add(modifiedMap); // Agregar el mapa modificado a la nueva lista
+            }
+
+            Map<String, Object> provider = new HashMap<>();
+            provider.put("tickets", modifiedList);
+            return new ResponseEntity<>(provider, HttpStatus.OK);
+        }catch(Exception ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(new Message("Error obtencion de tickets: "+ex.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @GetMapping("/getTicket-ticketNumber")
     public ResponseEntity<?> getTicketsByTicketNumber(@Validated @RequestParam("ticketNumber") String ticketNumber){
         try{
