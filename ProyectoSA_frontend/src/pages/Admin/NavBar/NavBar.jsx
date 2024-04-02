@@ -23,6 +23,9 @@ export const NavBar = () => {
                         <Nav.Link  href="/admin/register" eventKey="link-2">REGISTRO</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
+                        <Nav.Link  href="/admin/controller" eventKey="link-2">GESTOR DE CLIENTES</Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
                         <Nav.Link 
                             href="/login" 
                             eventKey="link-3"

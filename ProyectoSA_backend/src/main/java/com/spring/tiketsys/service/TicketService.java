@@ -25,8 +25,14 @@ public class TicketService {
     }
 
     @Transactional
-    public List<Map<String, Object>> getTicketsEmail(String email){
-        List<Map<String,Object>> tickets = ticketRepository.getTicketsByUsername(email);
+    public List<Map<String, Object>> getTicketsEmail(String email, int subject){
+        List<Map<String,Object>> tickets = ticketRepository.getTicketsByUsername(email, subject);
+        return tickets;
+    }
+
+    @Transactional
+    public List<Map<String, Object>> getTicketsSubject(int subject){
+        List<Map<String,Object>> tickets = ticketRepository.getTicketsSubject(subject);
         return tickets;
     }
 

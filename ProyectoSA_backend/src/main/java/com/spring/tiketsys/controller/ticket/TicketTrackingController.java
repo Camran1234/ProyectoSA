@@ -141,7 +141,6 @@ public class TicketTrackingController {
                 return new ResponseEntity<>(new Message("Sesión inválida"), HttpStatus.FORBIDDEN);
             }
             User agent = userService.getUser(jwtChecker.getSubject(authorizationHeader));
-
             List<Map<String, Object>> listTokens = ticketTrackingService.getAgentTickets(agent.getIdUser());
 
             List<Map<String, Object>> modifiedList = new ArrayList<>();

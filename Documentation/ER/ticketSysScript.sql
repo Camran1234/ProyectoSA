@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS `ticketDB`.`User` (
   `lastName` VARCHAR(200) NOT NULL,
   `phone` VARCHAR(30) NOT NULL,
   `userType` INT NOT NULL,
+  `blocked` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`idUser`),
   INDEX `fx_User_UserType_userTpe_idx` (`userType` ASC) VISIBLE,
   CONSTRAINT `fx_User_UserType_userTpe`
@@ -121,6 +122,7 @@ CREATE TABLE IF NOT EXISTS `ticketDB`.`TicketTracking` (
   `dateLastUpdate` DATE NULL,
   `agent` INT NULL,
   `problemSolved` TINYINT NOT NULL,
+  `surveyAvailable` TINYINT NOT NULL,
   PRIMARY KEY (`ticketNumber`),
   INDEX `fx_Ticket_State_of_Ticket_state_idx` (`state` ASC) VISIBLE,
   INDEX `fx_TicketTracking_User_agent_idx` (`agent` ASC) VISIBLE,

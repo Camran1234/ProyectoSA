@@ -1,0 +1,32 @@
+/* styles.css */
+.nav-link {
+    font-family: 'Courier New', Courier, monospace;
+    color: whitesmoke; /* Cambia el color de la letra */
+    font-weight: bold; /* Hace que el texto sea negrita */
+    padding-bottom: 1vh; /* Añade un relleno de 10px en la parte superior */
+    margin: 0vh 10px; /* Añade un margen de 0 en la parte superior e inferior y 10px en los lados */
+}
+
+.custom-navbar {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: rgba(0, 0, 0, 0.662); /* Color blanco semi-transparente */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra suave */
+    backdrop-filter: blur(10px); /* Aplica un desenfoque al fondo */
+    -webkit-backdrop-filter: blur(10px); /* Prefijo para compatibilidad con WebKit */
+    position: relative; /* Permite que los elementos hijos se coloquen encima */
+    z-index: 1; /* Asegura que el navbar esté por encima del contenido */
+    padding-top: 1vh;
+    padding-bottom: 1vh;
+}
+
+.nav-item {
+    height: 100%; /* Ajusta la altura del Nav.Item al 100% */
+}
+
+/* navLink.css */
+.nav-link.active {
+    color: blue !important; /* Cambia el color del enlace activo a azul */
+}
+
+
+

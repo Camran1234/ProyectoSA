@@ -9,7 +9,7 @@ export const RegisterAdmin = () => {
     }, [])
 
     return (
-        <div className="homeContainer">
+        <div className="adminContainer">
             <NavBar />
             <FormRegister />
         </div>

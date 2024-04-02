@@ -24,15 +24,18 @@ public class User {
     @JoinColumn(name="userType", referencedColumnName = "idUserType")
     private UserType userType;
 
+    private boolean blocked;
+
     public User() {
     }
-    public User(@NonNull String username, @NonNull String password, String name, String lastName, String phone, @NonNull UserType userType) {
+    public User(@NonNull String username, @NonNull String password, String name, String lastName, String phone, @NonNull UserType userType, boolean blocked) {
         this.username = username;
         this.password = password;
         this.name = name;
         this.lastName = lastName;
         this.phone = phone;
         this.userType = userType;
+        this.blocked = blocked;
     }
 
     public String getUsername() {
@@ -90,4 +93,8 @@ public class User {
     public void setUserType(UserType userType) {
         this.userType = userType;
     }
+
+    public boolean isBlocked(){return blocked;}
+
+    public void setBlocked(boolean blocked){this.blocked=blocked;}
 }

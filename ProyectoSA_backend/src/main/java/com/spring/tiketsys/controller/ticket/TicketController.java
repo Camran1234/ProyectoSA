@@ -22,6 +22,8 @@ import java.util.*;
 @RequestMapping("/api/ticket")
 public class TicketController {
     @Autowired
+    UserService userService;
+    @Autowired
     TicketService ticketService;
     @Autowired
     TicketTrackingService ticketTrackingService;
@@ -39,8 +41,10 @@ public class TicketController {
     JwtChecker jwtChecker;
 
     @PostMapping("/create-ticket")
-    public ResponseEntity<?> createTicket(@Validated @RequestBody String json){
+    public ResponseEntity<?> createTicket(@RequestHeader("Authorization") String authorizationHeader,
+                                          @Validated @RequestBody String json){
         try{
+            jwtChecker.checkJWT(authorizationHeader);
             JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);
             //TicketType ticketType = ticketTypeService.getByType(jsonNode.get("ticketType").asText());
             TicketType ticketType = ticketTypeService.findById(jsonNode.get("ticketType").asInt());
@@ -52,7 +56,7 @@ public class TicketController {
             for (JsonNode urlNode : urlsNode) {
                 urlsList.add(urlNode.asText());
             }
-
+            User user = userService.getUser(jwtChecker.getSubject(authorizationHeader));
             System.out.println("createTicket:"+ticketType.getType());
             Ticket ticket = new Ticket(
                     jsonNode.get("email").asText(),
@@ -62,7 +66,7 @@ public class TicketController {
                     jsonNode.get("description").asText(),
                     ticketType,
                     ticketPriority,
-                    null
+                    user
             );
             //Creacion del ticket
             ticket = ticketService.createTicket(ticket);
@@ -104,11 +108,43 @@ public class TicketController {
     }
 
     @GetMapping("/getTickets")
-    public ResponseEntity<?> getTickets(@Validated @RequestParam("email") String email){
+    public ResponseEntity<?> getTickets(@RequestHeader("Authorization") String authorizationHeader,
+                                        @Validated @RequestParam("email") String email){
         try{
-            List<Map<String,Object>> listTokens = ticketService.getTicketsEmail(email);
+            jwtChecker.checkJWT(authorizationHeader);
+            User user = userService.getUser(jwtChecker.getSubject(authorizationHeader));
+            List<Map<String,Object>> listTokens = ticketService.getTicketsEmail(email, user.getIdUser());
             if(listTokens.isEmpty()){
                 throw new TicketException("No se encontraron resultados para "+email);
+            }
+            List<Map<String, Object>> modifiedList = new ArrayList<>();
+            for (Map<String, Object> map : listTokens) {
+                Map<String, Object> modifiedMap = new HashMap<>(map); // Crear una copia modificable del mapa actual
+                String ticket = modifiedMap.get("ticketNumber").toString();
+                int ticketNumber = Integer.parseInt(ticket);
+                List<String> elements = ticketService.getTicketsElements(ticketNumber);
+                modifiedMap.put("files", elements);
+                modifiedList.add(modifiedMap); // Agregar el mapa modificado a la nueva lista
+            }
+
+            Map<String, Object> provider = new HashMap<>();
+            provider.put("tickets", modifiedList);
+            return new ResponseEntity<>(provider, HttpStatus.OK);
+        }catch(Exception ex){
+            ex.printStackTrace();
+            return new ResponseEntity<>(new Message("Error obtencion de tickets: "+ex.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/getTicketsSubject")
+    public ResponseEntity<?> getTicketsSubject(@RequestHeader("Authorization") String authorizationHeader){
+        try{
+            jwtChecker.checkJWT(authorizationHeader);
+            System.out.println(jwtChecker.getSubject(authorizationHeader));
+            User user = userService.getUser(jwtChecker.getSubject(authorizationHeader));
+            List<Map<String,Object>> listTokens = ticketService.getTicketsSubject(user.getIdUser());
+            if(listTokens.isEmpty()){
+                throw new TicketException("No se encontraron resultados para "+jwtChecker.getSubject(authorizationHeader));
             }
             List<Map<String, Object>> modifiedList = new ArrayList<>();
             for (Map<String, Object> map : listTokens) {
