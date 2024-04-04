@@ -1,0 +1,38 @@
+name: SA_Project CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:  
+  delivery-stage:
+    runs-on: ubuntu-latest
+      
+    steps:
+      - name: Checkout and copy code to workflow
+        uses: actions/checkout@v2
+
+            
+      # Configurar credenciales de Google Cloud Platform
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: 'Use gcloud CLI'
+        run: 'gcloud info'      
+  
+      # Kubernets
+      - name: Deploy to GKE cluster
+        uses: ameydev/gke-kubectl-action@master
+        env:
+          PROJECT_ID: proyectosa-415901
+          APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS_BASE64 }}
+          CLUSTER_NAME: sa-pr
+          ZONE_NAME: us-central1
+        with:
+          args: apply -f k8s/production-environment/

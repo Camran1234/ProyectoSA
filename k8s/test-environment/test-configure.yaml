@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: spring-service
-          image: camranjuntinase/sa_pr:proyectosa_backend_2.0.1
+          image: us-central1-docker.pkg.dev/proyectosa-415901/docker-repository/maven_microservice_ticket_test:latest
           ports:
             - containerPort: 33065  # Puerto de tu aplicación Spring
 
@@ -61,7 +61,7 @@ spec:
     spec:
       containers:
         - name: mysql-service
-          image: camranjuntinase/sa_pr:mysql_ticketsys
+          image: us-central1-docker.pkg.dev/proyectosa-415901/docker-repository/mysql_microservice_test:latest
           ports:
             - containerPort: 3306
 
@@ -96,26 +96,11 @@ spec:
     spec:
       containers:
         - name: react-service
-          image: camranjuntinase/sa_pr:proyectosa_frontend_2.0.1
+          image: us-central1-docker.pkg.dev/proyectosa-415901/docker-repository/node_microservice_frontend_test:latest
           ports:
             - containerPort: 5173
 
 ---
-#apiVersion: networking.k8s.io/v1
-#kind: Ingress
-#metadata:
-#  name: spring-ingress-ext
-#  namespace: default
-#  annotations:
-#    kubernetes.io/ingress.global-static-ip-name: dev-static-ip
-#spec:
-#  defaultBackend:
-#    service:
-#      name: spring-service
-#      port:
-#        number: 80
-#status:
-  #loadBalancer: {}
 
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -123,10 +108,10 @@ metadata:
   name: spring-ingress-ext
   namespace: default
   annotations:
-    kubernetes.io/ingress.global-static-ip-name: dev-static-ip
+    kubernetes.io/ingress.global-static-ip-name: test-static-ip
 spec:
   rules:
-    - host: dev-enviroment.ticketsys-asd.xyz
+    - host: test-enviroment.ticketsys-asd.xyz
       http:
         paths:
           - pathType: Prefix
