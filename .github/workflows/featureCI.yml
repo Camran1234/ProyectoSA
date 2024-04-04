@@ -106,6 +106,12 @@ jobs:
           gcloud auth configure-docker --quiet
           gcloud auth configure-docker $REGION_REGISTRY --quiet
           
+      # Configurar .env frontend
+      - name: Configure frontend environment variables
+        run: |        
+          cd ProyectoSA_frontend/
+          echo "${{ secrets.TEST_ENVIRONMENT }}" >> .env
+
       # Configurar dockers
       - name: Push Docker Image to Artifact Registry MySQL Service
         env: 
