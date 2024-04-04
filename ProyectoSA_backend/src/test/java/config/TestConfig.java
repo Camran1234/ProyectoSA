@@ -1,6 +1,7 @@
 package config;
 
 import com.spring.tiketsys.security.jwt.JwtChecker;
+import com.spring.tiketsys.security.jwt.JwtProvider;
 import com.spring.tiketsys.service.SurveyService;
 import com.spring.tiketsys.service.TicketService;
 import com.spring.tiketsys.service.TicketTrackingService;
@@ -12,10 +13,7 @@ import org.springframework.context.annotation.Bean;
 @TestConfiguration
 public class TestConfig {
 
-    @Autowired
-    SurveyService surveyService;
-    @Autowired
-    TicketService ticketService;
+
 
 
     @Bean
@@ -25,6 +23,15 @@ public class TestConfig {
 
     @Bean
     public TicketService ticketServiceMock() { return Mockito.mock(TicketService.class); }
+
+    @Bean
+    public TicketTrackingService ticketTrackingServiceMock() { return Mockito.mock(TicketTrackingService.class); }
+
+    @Bean
+    public JwtChecker jwtCheckerMock() { return Mockito.mock(JwtChecker.class); }
+
+    @Bean
+    public JwtProvider jwtProviderMock() { return Mockito.mock(JwtProvider.class); }
 
 
 
