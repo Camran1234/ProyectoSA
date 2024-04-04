@@ -112,7 +112,7 @@ jobs:
           GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
           IMAGE_NAME_MS: mysql_microservice_dev       
         run: |
-          cd Documentation/ER/
+          cd Documentation/
           docker build -t $IMAGE_NAME_MS:latest .
           docker tag $IMAGE_NAME_MS:latest $REGION_REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME_MS:latest
           docker tag $IMAGE_NAME_MS:latest $REGION_REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME_MS:${{ steps.increment-git-tag.outputs.git-tag }}
