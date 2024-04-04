@@ -30,9 +30,9 @@ replay_pid*
 .idea/
 
 #Spring data
-application.properties
-proyectosa-415901-05e988436626.json
-proyectosa-415901-e2e7cb2a7a1e.json
+#application.properties
+#proyectosa-415901-05e988436626.json
+#proyectosa-415901-e2e7cb2a7a1e.json
 
 
 #React Vite data
