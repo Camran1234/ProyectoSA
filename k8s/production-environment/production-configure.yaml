@@ -30,7 +30,46 @@ spec:
           image: us-central1-docker.pkg.dev/proyectosa-415901/docker-repository/maven_microservice_ticket:latest-production
           ports:
             - containerPort: 33065  # Puerto de tu aplicación Spring
-
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-service-ms-user
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-service-ms-user
+  template:
+    metadata:
+      labels:
+        app: spring-service-ms-user
+    spec:
+      containers:
+        - name: spring-service-ms-user
+          image: us-central1-docker.pkg.dev/proyectosa-415901/docker-repository/maven_microservice_ticket:latest-production
+          ports:
+            - containerPort: 33065  # Puerto de tu aplicación Spring
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-service-ms-reports
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-service-ms-reports
+  template:
+    metadata:
+      labels:
+        app: spring-service-ms-reports
+    spec:
+      containers:
+        - name: spring-service-ms-reports
+          image: us-central1-docker.pkg.dev/proyectosa-415901/docker-repository/maven_microservice_ticket:latest-production
+          ports:
+            - containerPort: 33065  # Puerto de tu aplicación Spring
 ---
 apiVersion: v1
 kind: Service
