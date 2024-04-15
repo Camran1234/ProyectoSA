@@ -41,7 +41,7 @@ jobs:
         run: |
           cd ProyectoSA_backend/
           mvn clean install -U
-          mvn build
+          mvn clean package
           mvn clean test jacoco:report
     
       - name: Publish JaCoCo report artifacts
@@ -49,5 +49,3 @@ jobs:
         with:
           name: jacoco-report
           path: ProyectoSA_backend/target/site/jacoco
-
-  
