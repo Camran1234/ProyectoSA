@@ -23,12 +23,15 @@ export const NavBar = () => {
                         <Nav.Link  href="/admin/register" eventKey="link-2">REGISTRO</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
-                        <Nav.Link  href="/admin/controller" eventKey="link-2">GESTOR DE CLIENTES</Nav.Link>
+                        <Nav.Link  href="/admin/controller" eventKey="link-3">GESTOR DE CLIENTES</Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                        <Nav.Link  href="/admin/reports" eventKey="link-4">INFORMES</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
                         <Nav.Link 
                             href="/login" 
-                            eventKey="link-3"
+                            eventKey="link-5"
                             onClick={() => removeSession()}
                         >CERRAR SESION
                         </Nav.Link>

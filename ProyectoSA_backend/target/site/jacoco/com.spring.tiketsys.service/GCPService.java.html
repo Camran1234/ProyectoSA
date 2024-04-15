@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GCPService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tiketsys</a> &gt; <a href="index.source.html" class="el_package">com.spring.tiketsys.service</a> &gt; <span class="el_source">GCPService.java</span></div><h1>GCPService.java</h1><pre class="source lang-java linenums">package com.spring.tiketsys.service;
+
+import com.google.cloud.storage.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+@Service
+<span class="nc" id="L21">public class GCPService {</span>
+    @Autowired
+    private Storage storage;
+    @Value(&quot;${gcs.bucket.name}&quot;)
+    private String bucketName;
+
+
+    public String uploadSample() throws IOException {
+<span class="nc" id="L29">        BlobId id = BlobId.of(bucketName,&quot;archivo_prueba.jpg&quot;);</span>
+<span class="nc" id="L30">        BlobInfo info = BlobInfo.newBuilder(id).build();</span>
+<span class="nc" id="L31">        File file = new File(&quot;/home/pharaox/Downloads/gato1.jpg&quot;);</span>
+<span class="nc" id="L32">        byte[] arr = Files.readAllBytes(Paths.get(file.toURI()));</span>
+<span class="nc" id="L33">        storage.create(info, arr);</span>
+<span class="nc" id="L34">        return &quot;Aprobado hahahhaha&quot;;</span>
+    }
+
+    public String uploadFile(FilePart file) throws IOException {
+<span class="nc" id="L38">        final String fileName = &quot;uploaded-files/&quot;+UUID.randomUUID()+file.filename(); // Genera un nombre de archivo único</span>
+<span class="nc" id="L39">        File mainFile = new File(file.name());</span>
+<span class="nc" id="L40">        try (FileOutputStream stream = new FileOutputStream(mainFile)) {</span>
+<span class="nc" id="L41">            byte[] arrayBytes = DataBufferUtils.join(file.content())</span>
+<span class="nc" id="L42">                    .map(dataBuffer -&gt; dataBuffer.asByteBuffer().array()).block();</span>
+<span class="nc" id="L43">            stream.write(arrayBytes);</span>
+
+            //Main file is the one to upload
+<span class="nc" id="L46">            storage.create(BlobInfo.newBuilder(bucketName, fileName).build(), arrayBytes);</span>
+            //String publicLink = storage.get(bucketName, fileName).signUrl(1, TimeUnit.DAYS).toString();
+            //String publicLink = storage.get(bucketName, fileName).getSelfLink();
+<span class="nc" id="L49">            String publicLink = &quot;https://storage.googleapis.com/&quot; + bucketName + &quot;/&quot; + fileName;</span>
+<span class="nc" id="L50">            return publicLink;</span>
+<span class="nc" id="L51">        } catch (IOException e) {</span>
+<span class="nc" id="L52">            throw new IOException(e.getMessage());</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

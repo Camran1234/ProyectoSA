@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TicketPriorityService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tiketsys</a> &gt; <a href="index.source.html" class="el_package">com.spring.tiketsys.service</a> &gt; <span class="el_source">TicketPriorityService.java</span></div><h1>TicketPriorityService.java</h1><pre class="source lang-java linenums">package com.spring.tiketsys.service;
+
+import com.spring.tiketsys.dto.entity.TicketPriority;
+import com.spring.tiketsys.repository.TicketPriorityRepository;
+import com.spring.tiketsys.security.exceptions.TicketException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+<span class="nc" id="L12">public class TicketPriorityService {</span>
+    @Autowired
+    private TicketPriorityRepository ticketPriorityRepository;
+
+    public TicketPriority getByPriority(String priority) throws  TicketException{
+<span class="nc" id="L17">        List&lt;TicketPriority&gt; ticketPriorityList = ticketPriorityRepository.findAll();</span>
+<span class="nc bnc" id="L18" title="All 2 branches missed.">        for(TicketPriority ticketPriority:ticketPriorityList){</span>
+<span class="nc bnc" id="L19" title="All 2 branches missed.">            if(ticketPriority.getPriority().equalsIgnoreCase(priority)){</span>
+<span class="nc" id="L20">                return ticketPriority;</span>
+            }
+<span class="nc" id="L22">        }</span>
+<span class="nc" id="L23">        throw new TicketException(&quot;No se encontro la prioridad del ticket, proporcionado: &quot;+priority);</span>
+    }
+
+    public TicketPriority findById(int id){
+<span class="nc" id="L27">        return ticketPriorityRepository.findById(id).get();</span>
+    }
+
+<span class="nc" id="L30">    public TicketPriority getReferencedById(int id) {return ticketPriorityRepository.getReferenceById(id);}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

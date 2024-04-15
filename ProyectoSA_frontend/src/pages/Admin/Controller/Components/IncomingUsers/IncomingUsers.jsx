@@ -7,8 +7,6 @@ import { showConfirmationMessage, showSuccessMessage } from '../../../../../comp
 import { HttpService } from '../../../../../Services/HttpService';
 import { getToken } from '../../../../../Services/userHandler';
 export const IncomingUsers = ({users, requireLoad}) => {
-        
-
     const changeBlock = (user, blockState) => {
         const attendTicket = () => {
             HttpService.postProtected('/api/user/changeBlock', {username: user.username, blocked: blockState? 1: 0}, getToken())

@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TicketController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tiketsys</a> &gt; <a href="index.source.html" class="el_package">com.spring.tiketsys.controller.ticket</a> &gt; <span class="el_source">TicketController.java</span></div><h1>TicketController.java</h1><pre class="source lang-java linenums">package com.spring.tiketsys.controller.ticket;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.spring.tiketsys.config.JsonOptions;
+import com.spring.tiketsys.dto.entity.*;
+import com.spring.tiketsys.dto.model.TicketDTO;
+import com.spring.tiketsys.security.entity.Message;
+import com.spring.tiketsys.security.exceptions.TicketException;
+import com.spring.tiketsys.security.jwt.JwtChecker;
+import com.spring.tiketsys.service.*;
+import org.apache.catalina.mapper.Mapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+
+@RestController
+@CrossOrigin
+@RequestMapping(&quot;/api/ticket&quot;)
+<span class="fc" id="L23">public class TicketController {</span>
+    @Autowired
+    UserService userService;
+    @Autowired
+    TicketService ticketService;
+    @Autowired
+    TicketTrackingService ticketTrackingService;
+    @Autowired
+    TicketTypeService ticketTypeService;
+    @Autowired
+    TicketPriorityService ticketPriorityService;
+    @Autowired
+    State_of_TicketService stateOfTicketService;
+    @Autowired
+    History_of_CommunicationService historyOfCommunicationService;
+    @Autowired
+    TicketElementService ticketElementService;
+    @Autowired
+    JwtChecker jwtChecker;
+
+    @PostMapping(&quot;/create-ticket&quot;)
+    public ResponseEntity&lt;?&gt; createTicket(@RequestHeader(&quot;Authorization&quot;) String authorizationHeader,
+                                          @Validated @RequestBody String json){
+        try{
+<span class="fc" id="L47">            jwtChecker.checkJWT(authorizationHeader);</span>
+<span class="fc" id="L48">            JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);</span>
+            //TicketType ticketType = ticketTypeService.getByType(jsonNode.get(&quot;ticketType&quot;).asText());
+<span class="fc" id="L50">            TicketType ticketType = ticketTypeService.findById(jsonNode.get(&quot;ticketType&quot;).asInt());</span>
+            //TicketPriority ticketPriority = ticketPriorityService.getByPriority(jsonNode.get(&quot;ticketPriority&quot;).asText());
+<span class="fc" id="L52">            TicketPriority ticketPriority = ticketPriorityService.findById(jsonNode.get(&quot;ticketPriority&quot;).asInt());</span>
+            // Obtener la lista de URLs del campo &quot;urls&quot;
+<span class="fc" id="L54">            JsonNode urlsNode = jsonNode.get(&quot;files&quot;);</span>
+<span class="fc" id="L55">            List&lt;String&gt; urlsList = new ArrayList&lt;&gt;();</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">            for (JsonNode urlNode : urlsNode) {</span>
+<span class="nc" id="L57">                urlsList.add(urlNode.asText());</span>
+<span class="nc" id="L58">            }</span>
+<span class="fc" id="L59">            User user = userService.getUser(jwtChecker.getSubject(authorizationHeader));</span>
+<span class="fc" id="L60">            System.out.println(&quot;createTicket:&quot;+ticketType.getType());</span>
+<span class="fc" id="L61">            Ticket ticket = new Ticket(</span>
+<span class="fc" id="L62">                    jsonNode.get(&quot;email&quot;).asText(),</span>
+<span class="fc" id="L63">                    jsonNode.get(&quot;name&quot;).asText(),</span>
+<span class="fc" id="L64">                    jsonNode.get(&quot;lastName&quot;).asText(),</span>
+<span class="fc" id="L65">                    jsonNode.get(&quot;phone&quot;).asText(),</span>
+<span class="fc" id="L66">                    jsonNode.get(&quot;description&quot;).asText(),</span>
+                    ticketType,
+                    ticketPriority,
+                    user
+            );
+            //Creacion del ticket
+<span class="fc" id="L72">            ticket = ticketService.createTicket(ticket);</span>
+            //Create Elements
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">            for(String url:urlsList){</span>
+<span class="nc" id="L75">                ticketElementService.saveElement(ticket,url);</span>
+<span class="nc" id="L76">            }</span>
+            //Creacion del tracking
+<span class="fc" id="L78">            State_of_Ticket stateOfTicket = stateOfTicketService.getReferencedById(1);</span>
+<span class="fc" id="L79">            TicketTracking ticketTracking = ticketTrackingService.createTrack(ticket,stateOfTicket);</span>
+
+            //Creacion del historial
+<span class="fc" id="L82">            historyOfCommunicationService.saveLog(</span>
+                    ticketTracking,
+<span class="fc" id="L84">                    &quot;Se creo el ticket de tipo:&quot;+ticket.getTicketType().getType()+&quot;, de prioridad:&quot;+ticket.getPriority().getPriority()</span>
+            );
+
+<span class="fc" id="L87">            return ResponseEntity.status(HttpStatus.CREATED).body(&quot;{}&quot;);</span>
+<span class="nc" id="L88">        }catch(Exception ex){</span>
+<span class="nc" id="L89">            ex.printStackTrace();</span>
+<span class="nc" id="L90">            System.out.println(&quot;Error: &quot;+ex.getMessage());</span>
+<span class="nc" id="L91">            return new ResponseEntity&lt;&gt;(new Message(&quot;Error en creacion de tickets: &quot;+ex.getMessage()), HttpStatus.BAD_REQUEST);</span>
+        }
+    }
+
+    @GetMapping(&quot;/getTickets-all&quot;)
+    public ResponseEntity&lt;?&gt; getAllTickets(@RequestHeader(&quot;Authorization&quot;) String authorizationHeader){
+        try{
+<span class="fc bfc" id="L98" title="All 2 branches covered.">            if (!jwtChecker.initCheck(authorizationHeader)||</span>
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">                    !jwtChecker.getSubjectType(authorizationHeader).equalsIgnoreCase(&quot;2&quot;)) {</span>
+                // Registra una sesión inválida
+<span class="fc" id="L101">                return new ResponseEntity&lt;&gt;(new Message(&quot;Sesión inválida&quot;), HttpStatus.FORBIDDEN);</span>
+            }
+<span class="fc" id="L103">            List&lt;Map&lt;String, Object&gt;&gt; tickets = ticketService.getUnsolvedTickets();</span>
+<span class="fc" id="L104">            return ResponseEntity.status(HttpStatus.OK).body(tickets);</span>
+<span class="nc" id="L105">        }catch(Exception ex){</span>
+<span class="nc" id="L106">            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Message(&quot;No se pudo obtener los tickets&quot;));</span>
+        }
+    }
+
+    @GetMapping(&quot;/getTickets&quot;)
+    public ResponseEntity&lt;?&gt; getTickets(@RequestHeader(&quot;Authorization&quot;) String authorizationHeader,
+                                        @Validated @RequestParam(&quot;email&quot;) String email){
+        try{
+<span class="fc" id="L114">            jwtChecker.checkJWT(authorizationHeader);</span>
+<span class="fc" id="L115">            User user = userService.getUser(jwtChecker.getSubject(authorizationHeader));</span>
+<span class="fc" id="L116">            List&lt;Map&lt;String,Object&gt;&gt; listTokens = ticketService.getTicketsEmail(email, user.getIdUser());</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">            if(listTokens.isEmpty()){</span>
+<span class="fc" id="L118">                throw new TicketException(&quot;No se encontraron resultados para &quot;+email);</span>
+            }
+<span class="fc" id="L120">            List&lt;Map&lt;String, Object&gt;&gt; modifiedList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">            for (Map&lt;String, Object&gt; map : listTokens) {</span>
+<span class="fc" id="L122">                Map&lt;String, Object&gt; modifiedMap = new HashMap&lt;&gt;(map); // Crear una copia modificable del mapa actual</span>
+<span class="fc" id="L123">                String ticket = modifiedMap.get(&quot;ticketNumber&quot;).toString();</span>
+<span class="fc" id="L124">                int ticketNumber = Integer.parseInt(ticket);</span>
+<span class="fc" id="L125">                List&lt;String&gt; elements = ticketService.getTicketsElements(ticketNumber);</span>
+<span class="fc" id="L126">                modifiedMap.put(&quot;files&quot;, elements);</span>
+<span class="fc" id="L127">                modifiedList.add(modifiedMap); // Agregar el mapa modificado a la nueva lista</span>
+<span class="fc" id="L128">            }</span>
+
+<span class="fc" id="L130">            Map&lt;String, Object&gt; provider = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L131">            provider.put(&quot;tickets&quot;, modifiedList);</span>
+<span class="fc" id="L132">            return new ResponseEntity&lt;&gt;(provider, HttpStatus.OK);</span>
+<span class="fc" id="L133">        }catch(Exception ex){</span>
+<span class="fc" id="L134">            ex.printStackTrace();</span>
+<span class="fc" id="L135">            return new ResponseEntity&lt;&gt;(new Message(&quot;Error obtencion de tickets: &quot;+ex.getMessage()), HttpStatus.BAD_REQUEST);</span>
+        }
+    }
+
+    @GetMapping(&quot;/getTicketsSubject&quot;)
+    public ResponseEntity&lt;?&gt; getTicketsSubject(@RequestHeader(&quot;Authorization&quot;) String authorizationHeader){
+        try{
+<span class="fc" id="L142">            jwtChecker.checkJWT(authorizationHeader);</span>
+<span class="fc" id="L143">            System.out.println(jwtChecker.getSubject(authorizationHeader));</span>
+<span class="fc" id="L144">            User user = userService.getUser(jwtChecker.getSubject(authorizationHeader));</span>
+<span class="fc" id="L145">            List&lt;Map&lt;String,Object&gt;&gt; listTokens = ticketService.getTicketsSubject(user.getIdUser());</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">            if(listTokens.isEmpty()){</span>
+<span class="fc" id="L147">                throw new TicketException(&quot;No se encontraron resultados para &quot;+jwtChecker.getSubject(authorizationHeader));</span>
+            }
+<span class="fc" id="L149">            List&lt;Map&lt;String, Object&gt;&gt; modifiedList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">            for (Map&lt;String, Object&gt; map : listTokens) {</span>
+<span class="fc" id="L151">                Map&lt;String, Object&gt; modifiedMap = new HashMap&lt;&gt;(map); // Crear una copia modificable del mapa actual</span>
+<span class="fc" id="L152">                String ticket = modifiedMap.get(&quot;ticketNumber&quot;).toString();</span>
+<span class="fc" id="L153">                int ticketNumber = Integer.parseInt(ticket);</span>
+<span class="fc" id="L154">                List&lt;String&gt; elements = ticketService.getTicketsElements(ticketNumber);</span>
+<span class="fc" id="L155">                modifiedMap.put(&quot;files&quot;, elements);</span>
+<span class="fc" id="L156">                modifiedList.add(modifiedMap); // Agregar el mapa modificado a la nueva lista</span>
+<span class="fc" id="L157">            }</span>
+
+<span class="fc" id="L159">            Map&lt;String, Object&gt; provider = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L160">            provider.put(&quot;tickets&quot;, modifiedList);</span>
+<span class="fc" id="L161">            return new ResponseEntity&lt;&gt;(provider, HttpStatus.OK);</span>
+<span class="fc" id="L162">        }catch(Exception ex){</span>
+<span class="fc" id="L163">            ex.printStackTrace();</span>
+<span class="fc" id="L164">            return new ResponseEntity&lt;&gt;(new Message(&quot;Error obtencion de tickets: &quot;+ex.getMessage()), HttpStatus.BAD_REQUEST);</span>
+        }
+    }
+
+    @GetMapping(&quot;/getTickets-no-survey&quot;)
+    public ResponseEntity&lt;?&gt; getTicketsWithoutSurvey(@RequestHeader(&quot;Authorization&quot;) String authorizationHeader){
+        try{
+<span class="fc" id="L171">            jwtChecker.checkJWT(authorizationHeader);</span>
+<span class="fc" id="L172">            System.out.println(jwtChecker.getSubject(authorizationHeader));</span>
+<span class="fc" id="L173">            User user = userService.getUser(jwtChecker.getSubject(authorizationHeader));</span>
+<span class="fc" id="L174">            List&lt;Map&lt;String,Object&gt;&gt; listTokens = ticketService.getTicketsWithoutSurvey(user.getIdUser());</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">            if(listTokens.isEmpty()){</span>
+<span class="fc" id="L176">                throw new TicketException(&quot;No se encontraron resultados para &quot;+jwtChecker.getSubject(authorizationHeader));</span>
+            }
+<span class="fc" id="L178">            List&lt;Map&lt;String, Object&gt;&gt; modifiedList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">            for (Map&lt;String, Object&gt; map : listTokens) {</span>
+<span class="fc" id="L180">                Map&lt;String, Object&gt; modifiedMap = new HashMap&lt;&gt;(map); // Crear una copia modificable del mapa actual</span>
+<span class="fc" id="L181">                String ticket = modifiedMap.get(&quot;ticketNumber&quot;).toString();</span>
+<span class="fc" id="L182">                int ticketNumber = Integer.parseInt(ticket);</span>
+<span class="fc" id="L183">                List&lt;String&gt; elements = ticketService.getTicketsElements(ticketNumber);</span>
+<span class="fc" id="L184">                modifiedMap.put(&quot;files&quot;, elements);</span>
+<span class="fc" id="L185">                modifiedList.add(modifiedMap); // Agregar el mapa modificado a la nueva lista</span>
+<span class="fc" id="L186">            }</span>
+
+<span class="fc" id="L188">            Map&lt;String, Object&gt; provider = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L189">            provider.put(&quot;tickets&quot;, modifiedList);</span>
+<span class="fc" id="L190">            return new ResponseEntity&lt;&gt;(provider, HttpStatus.OK);</span>
+<span class="fc" id="L191">        }catch(Exception ex){</span>
+<span class="fc" id="L192">            ex.printStackTrace();</span>
+<span class="fc" id="L193">            return new ResponseEntity&lt;&gt;(new Message(&quot;Error obtencion de tickets: &quot;+ex.getMessage()), HttpStatus.BAD_REQUEST);</span>
+        }
+    }
+
+    @GetMapping(&quot;/getTicket-ticketNumber&quot;)
+    public ResponseEntity&lt;?&gt; getTicketsByTicketNumber(@Validated @RequestParam(&quot;ticketNumber&quot;) String ticketNumber){
+        try{
+<span class="fc" id="L200">            Map&lt;String,Object&gt; map = ticketService.getTicketsbyNumber(Integer.parseInt(ticketNumber));</span>
+<span class="fc bfc" id="L201" title="All 2 branches covered.">            if(map.isEmpty()){</span>
+<span class="fc" id="L202">                throw new TicketException(&quot;No se encontraron resultados para &quot;+ticketNumber);</span>
+            }
+<span class="fc" id="L204">            Map&lt;String, Object&gt; modifiedMap = new HashMap&lt;&gt;(map); // Crear una copia modificable del mapa actual</span>
+<span class="fc" id="L205">            List&lt;String&gt; elements = ticketService.getTicketsElements(Integer.parseInt(ticketNumber));</span>
+<span class="fc" id="L206">            modifiedMap.put(&quot;files&quot;, elements);</span>
+
+
+<span class="fc" id="L209">            Map&lt;String, Object&gt; provider = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L210">            provider.put(&quot;ticket&quot;, modifiedMap);</span>
+<span class="fc" id="L211">            return new ResponseEntity&lt;&gt;(provider, HttpStatus.OK);</span>
+<span class="fc" id="L212">        }catch(Exception ex){</span>
+<span class="fc" id="L213">            ex.printStackTrace();</span>
+<span class="fc" id="L214">            return new ResponseEntity&lt;&gt;(new Message(&quot;Error obtencion de tickets: &quot;+ex.getMessage()), HttpStatus.BAD_REQUEST);</span>
+        }
+    }
+
+
+    @PostMapping(&quot;/change-priority&quot;)
+    public ResponseEntity&lt;?&gt; changeTicketPriority(@Validated @RequestBody String json){
+        try{
+<span class="fc" id="L222">            JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);</span>
+            // Find the new Priority
+<span class="fc" id="L224">            TicketPriority priority = ticketPriorityService.getReferencedById(</span>
+<span class="fc" id="L225">                    jsonNode.get(&quot;priority&quot;).asInt()</span>
+            );
+            //Find the ticket
+<span class="fc" id="L228">            Ticket ticket = ticketService.findById(</span>
+<span class="fc" id="L229">                    jsonNode.get(&quot;ticketNumber&quot;).asInt()</span>
+            );
+
+<span class="fc" id="L232">            ticket.setPriority(priority);</span>
+<span class="fc" id="L233">            ticketService.createTicket(ticket);</span>
+
+<span class="fc" id="L235">            TicketTracking ticketTracking = ticketTrackingService.findById(</span>
+<span class="fc" id="L236">                    jsonNode.get(&quot;ticketNumber&quot;).asInt()</span>
+            );
+<span class="fc" id="L238">            ticketTracking.setDateLastUpdation(new Date());</span>
+<span class="fc" id="L239">            ticketTracking = ticketTrackingService.saveTicket(ticketTracking);</span>
+<span class="fc" id="L240">            historyOfCommunicationService.saveLog(</span>
+                    ticketTracking,
+<span class="fc" id="L242">                    &quot;Se cambio la prioridad del ticket a &quot;+jsonNode.get(&quot;priority&quot;).asText()</span>
+            );
+<span class="fc" id="L244">            return ResponseEntity.status(HttpStatus.CREATED).build();</span>
+<span class="fc" id="L245">        }catch(Exception ex){</span>
+<span class="fc" id="L246">            ex.printStackTrace();</span>
+<span class="fc" id="L247">            return new ResponseEntity&lt;&gt;(new Message(&quot;Error en cambio de prioridad en ticket: &quot;+ex.getMessage()), HttpStatus.BAD_REQUEST);</span>
+        }
+    }
+
+
+
+
+    @PostMapping(&quot;/assign-owner&quot;)
+    public ResponseEntity&lt;?&gt; assignOwner(@Validated @RequestBody String json){
+        try{
+            //Deprecated
+<span class="nc" id="L258">            return null;</span>
+<span class="nc" id="L259">        }catch(Exception ex){</span>
+<span class="nc" id="L260">            return new ResponseEntity&lt;&gt;(new Message(&quot;Error en cambio de prioridad en ticket: &quot;+ex.getMessage()), HttpStatus.BAD_REQUEST);</span>
+        }
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

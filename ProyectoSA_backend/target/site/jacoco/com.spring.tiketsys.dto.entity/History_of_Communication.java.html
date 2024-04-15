@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>History_of_Communication.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tiketsys</a> &gt; <a href="index.source.html" class="el_package">com.spring.tiketsys.dto.entity</a> &gt; <span class="el_source">History_of_Communication.java</span></div><h1>History_of_Communication.java</h1><pre class="source lang-java linenums">package com.spring.tiketsys.dto.entity;
+
+import com.spring.tiketsys.dto.ParserEntity;
+import com.spring.tiketsys.dto.entity.compundkeys.History_of_CommunicationId;
+import com.spring.tiketsys.dto.model.History_of_CommunicationDTO;
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+
+@Entity
+@IdClass(History_of_CommunicationId.class)
+@Table(name=&quot;History_of_Communication&quot;)
+<span class="nc bnc" id="L18" title="All 44 branches missed.">@Data</span>
+public class History_of_Communication implements ParserEntity {
+    @Id
+    @NonNull
+    @Column(name = &quot;idHistory&quot;)
+    private int idHistory;
+
+    @Id
+    @NonNull
+    @Column(name = &quot;ticketNumber&quot;)
+<span class="nc" id="L28">    private int ticketNumber;</span>
+
+    @ManyToOne(fetch=FetchType.EAGER)
+    @JoinColumn(name=&quot;ticketNumber&quot;, referencedColumnName = &quot;ticketNumber&quot;, insertable = false, updatable = false)
+    private TicketTracking ticket;
+
+    @NonNull
+    @Column(name = &quot;dateTimeContacted&quot;, columnDefinition = &quot;DATETIME&quot;)
+    private Date dateTimeContacted;
+
+    @Column(name = &quot;sent&quot;, columnDefinition = &quot;TEXT&quot;)
+    private String sent;
+
+    @Column(name = &quot;received&quot;, columnDefinition = &quot;TEXT&quot;)
+    private String received;
+
+    @NonNull
+    @Column(name = &quot;description&quot;, columnDefinition = &quot;TEXT&quot;)
+    private String description;
+
+
+<span class="nc" id="L49">    public History_of_Communication() {</span>
+<span class="nc" id="L50">    }</span>
+
+    public History_of_Communication(int idHistory, int ticketNumber, Date dateTimeContacted,
+<span class="nc" id="L53">                                    String sent, String received, String description) {</span>
+<span class="nc" id="L54">        this.idHistory = idHistory;</span>
+<span class="nc" id="L55">        this.ticketNumber = ticketNumber;</span>
+<span class="nc" id="L56">        this.dateTimeContacted = dateTimeContacted;</span>
+<span class="nc" id="L57">        this.sent = sent;</span>
+<span class="nc" id="L58">        this.received = received;</span>
+<span class="nc" id="L59">        this.description = description;</span>
+
+<span class="nc" id="L61">    }</span>
+
+    public String getReceived() {
+<span class="nc" id="L64">        return received;</span>
+    }
+
+    public void setReceived(String received) {
+<span class="nc" id="L68">        this.received = received;</span>
+<span class="nc" id="L69">    }</span>
+
+    public int getTicket() {
+<span class="nc" id="L72">        return ticketNumber;</span>
+    }
+
+    public void setTicket(int ticket) {
+<span class="nc" id="L76">        this.ticketNumber = ticket;</span>
+<span class="nc" id="L77">    }</span>
+
+    public int getIdHistory() {
+<span class="nc" id="L80">        return idHistory;</span>
+    }
+
+    public void setIdHistory(int idHistory) {
+<span class="nc" id="L84">        this.idHistory = idHistory;</span>
+<span class="nc" id="L85">    }</span>
+
+
+
+    public Date getDateTimeContacted() {
+<span class="nc" id="L90">        return dateTimeContacted;</span>
+    }
+
+    public void setDateTimeContacted(Date dateTimeContacted) {
+<span class="nc" id="L94">        this.dateTimeContacted = dateTimeContacted;</span>
+<span class="nc" id="L95">    }</span>
+
+    public String getSent() {
+<span class="nc" id="L98">        return sent;</span>
+    }
+
+    public void setSent(String sent) {
+<span class="nc" id="L102">        this.sent = sent;</span>
+<span class="nc" id="L103">    }</span>
+
+    public String getRecieved() {
+<span class="nc" id="L106">        return received;</span>
+    }
+
+    public void setRecieved(String received) {
+<span class="nc" id="L110">        this.received = received;</span>
+<span class="nc" id="L111">    }</span>
+
+    public String getDescription() {
+<span class="nc" id="L114">        return description;</span>
+    }
+
+    public void setDescription(String description) {
+<span class="nc" id="L118">        this.description = description;</span>
+<span class="nc" id="L119">    }</span>
+
+<span class="nc" id="L121">    @SneakyThrows</span>
+    @Override
+    public History_of_CommunicationDTO parseToDTO() {
+
+<span class="nc" id="L125">        return new History_of_CommunicationDTO(</span>
+<span class="nc" id="L126">                this.getIdHistory(),</span>
+<span class="nc" id="L127">                this.getTicket(),</span>
+<span class="nc" id="L128">                this.getDateTimeContacted(),</span>
+<span class="nc" id="L129">                this.getSent(),</span>
+<span class="nc" id="L130">                this.getRecieved(),</span>
+<span class="nc" id="L131">                this.getDescription()</span>
+        );
+    }
+
+    @Override
+    public History_of_Communication parseToEntity() {
+<span class="nc" id="L137">        return this;</span>
+    }
+
+    @Override
+    public String toCSV() {
+<span class="nc" id="L142">        StringBuffer string = new StringBuffer();</span>
+<span class="nc" id="L143">        string.append(getIdHistory());</span>
+<span class="nc" id="L144">        string.append(getTicket());</span>
+<span class="nc" id="L145">        string.append(getDateTimeContacted());</span>
+<span class="nc" id="L146">        string.append(getSent());</span>
+<span class="nc" id="L147">        string.append(getRecieved());</span>
+<span class="nc" id="L148">        string.append(getDescription());</span>
+<span class="nc" id="L149">        return string.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

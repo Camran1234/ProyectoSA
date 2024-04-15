@@ -1,1 +1,5 @@
-/home/pharaox/Documents/Projects/ProyectoSA/ProyectoSA_backend/src/test/java/com/spring/tiketsys/TiketsysApplicationTests.java
+/home/pharaox/Documents/Projects/Griffiun_Repositories/ProyectoSA_v2.2/ProyectoSA_backend/src/test/java/SurveyControllerTest.java
+/home/pharaox/Documents/Projects/Griffiun_Repositories/ProyectoSA_v2.2/ProyectoSA_backend/src/test/java/TicketTrackingControllerTest.java
+/home/pharaox/Documents/Projects/Griffiun_Repositories/ProyectoSA_v2.2/ProyectoSA_backend/src/test/java/TicketControllerTest.java
+/home/pharaox/Documents/Projects/Griffiun_Repositories/ProyectoSA_v2.2/ProyectoSA_backend/src/test/java/UserControllerTest.java
+/home/pharaox/Documents/Projects/Griffiun_Repositories/ProyectoSA_v2.2/ProyectoSA_backend/src/test/java/config/TestConfig.java

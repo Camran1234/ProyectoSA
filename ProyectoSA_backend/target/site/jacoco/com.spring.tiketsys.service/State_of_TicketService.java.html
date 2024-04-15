@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>State_of_TicketService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tiketsys</a> &gt; <a href="index.source.html" class="el_package">com.spring.tiketsys.service</a> &gt; <span class="el_source">State_of_TicketService.java</span></div><h1>State_of_TicketService.java</h1><pre class="source lang-java linenums">package com.spring.tiketsys.service;
+
+import com.spring.tiketsys.dto.entity.State_of_Ticket;
+import com.spring.tiketsys.repository.State_of_TicketRepository;
+import com.spring.tiketsys.security.exceptions.TicketException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+<span class="nc" id="L12">public class State_of_TicketService {</span>
+    @Autowired
+    private State_of_TicketRepository stateOfTicketRepository;
+
+
+    public State_of_Ticket getByState(String state) throws TicketException{
+<span class="nc" id="L18">        List&lt;State_of_Ticket&gt; list = stateOfTicketRepository.findAll();</span>
+<span class="nc bnc" id="L19" title="All 2 branches missed.">        for(State_of_Ticket stateOfTicket: list){</span>
+<span class="nc bnc" id="L20" title="All 2 branches missed.">            if(stateOfTicket.getState().equalsIgnoreCase(state)){</span>
+<span class="nc" id="L21">                return stateOfTicket;</span>
+            }
+<span class="nc" id="L23">        }</span>
+<span class="nc" id="L24">        throw new TicketException(&quot;Estado de ticket no encontrado, proporcionado: &quot;+state);</span>
+    }
+
+    public State_of_Ticket getReferencedById(int id){
+<span class="nc" id="L28">        return stateOfTicketRepository.getReferenceById(id);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TicketTrackingDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tiketsys</a> &gt; <a href="index.source.html" class="el_package">com.spring.tiketsys.dto.model</a> &gt; <span class="el_source">TicketTrackingDTO.java</span></div><h1>TicketTrackingDTO.java</h1><pre class="source lang-java linenums">package com.spring.tiketsys.dto.model;
+
+import java.util.Date;
+
+public class TicketTrackingDTO {
+    private int ticketNumber;
+    private int state;
+    private Date dateofCreation;
+    private Date dateLastUpdate;
+    private int agent;
+    private boolean problemSolved;
+
+<span class="nc" id="L13">    public TicketTrackingDTO() {</span>
+<span class="nc" id="L14">    }</span>
+
+<span class="nc" id="L16">    public TicketTrackingDTO(int ticketNumber, int state, Date dateofCreation, Date dateLastUpdate, int agent, boolean problemSolved) {</span>
+<span class="nc" id="L17">        this.ticketNumber = ticketNumber;</span>
+<span class="nc" id="L18">        this.state = state;</span>
+<span class="nc" id="L19">        this.dateofCreation = dateofCreation;</span>
+<span class="nc" id="L20">        this.dateLastUpdate = dateLastUpdate;</span>
+<span class="nc" id="L21">        this.agent = agent;</span>
+<span class="nc" id="L22">        this.problemSolved = problemSolved;</span>
+<span class="nc" id="L23">    }</span>
+
+    public int getTicketNumber() {
+<span class="nc" id="L26">        return ticketNumber;</span>
+    }
+
+    public void setTicketNumber(int ticketNumber) {
+<span class="nc" id="L30">        this.ticketNumber = ticketNumber;</span>
+<span class="nc" id="L31">    }</span>
+
+    public int getState() {
+<span class="nc" id="L34">        return state;</span>
+    }
+
+    public void setState(int state) {
+<span class="nc" id="L38">        this.state = state;</span>
+<span class="nc" id="L39">    }</span>
+
+    public Date getDateofCreation() {
+<span class="nc" id="L42">        return dateofCreation;</span>
+    }
+
+    public void setDateofCreation(Date dateofCreation) {
+<span class="nc" id="L46">        this.dateofCreation = dateofCreation;</span>
+<span class="nc" id="L47">    }</span>
+
+    public Date getDateLastUpdate() {
+<span class="nc" id="L50">        return dateLastUpdate;</span>
+    }
+
+    public void setDateLastUpdate(Date dateLastUpdate) {
+<span class="nc" id="L54">        this.dateLastUpdate = dateLastUpdate;</span>
+<span class="nc" id="L55">    }</span>
+
+    public int getAgent() {
+<span class="nc" id="L58">        return agent;</span>
+    }
+
+    public void setAgent(int agent) {
+<span class="nc" id="L62">        this.agent = agent;</span>
+<span class="nc" id="L63">    }</span>
+
+    public boolean isProblemSolved() {
+<span class="nc" id="L66">        return problemSolved;</span>
+    }
+
+    public void setProblemSolved(boolean problemSolved) {
+<span class="nc" id="L70">        this.problemSolved = problemSolved;</span>
+<span class="nc" id="L71">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>
