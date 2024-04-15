@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TicketTrackingController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tiketsys</a> &gt; <a href="index.source.html" class="el_package">com.spring.tiketsys.controller.ticket</a> &gt; <span class="el_source">TicketTrackingController.java</span></div><h1>TicketTrackingController.java</h1><pre class="source lang-java linenums">package com.spring.tiketsys.controller.ticket;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.spring.tiketsys.config.JsonOptions;
+import com.spring.tiketsys.dto.entity.History_of_Communication;
+import com.spring.tiketsys.dto.entity.State_of_Ticket;
+import com.spring.tiketsys.dto.entity.TicketTracking;
+import com.spring.tiketsys.dto.entity.User;
+import com.spring.tiketsys.dto.model.History_of_CommunicationDTO;
+import com.spring.tiketsys.security.entity.Message;
+import com.spring.tiketsys.security.exceptions.TicketException;
+import com.spring.tiketsys.security.jwt.JwtChecker;
+import com.spring.tiketsys.service.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+@RestController
+@CrossOrigin
+@RequestMapping(&quot;/api/tracking&quot;)
+<span class="fc" id="L26">public class TicketTrackingController {</span>
+    @Autowired
+    TicketTrackingService ticketTrackingService;
+    @Autowired
+    TicketService ticketService;
+    @Autowired
+    State_of_TicketService stateOfTicketService;
+    @Autowired
+    History_of_CommunicationService historyOfCommunicationService;
+    @Autowired
+    UserService userService;
+    @Autowired
+    JwtChecker jwtChecker;
+
+
+    @PostMapping(&quot;/change-state&quot;)
+    public ResponseEntity&lt;?&gt; changeTicketState(@Validated @RequestBody String json,
+                                               @RequestHeader(&quot;Authorization&quot;) String authorizationHeader){
+        try{
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">            if(!jwtChecker.initCheck(authorizationHeader)){</span>
+<span class="nc" id="L46">                return new ResponseEntity&lt;&gt;(new Message(&quot;Sesion invalida&quot;), HttpStatus.FORBIDDEN);</span>
+            }
+<span class="fc" id="L48">            JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);</span>
+            // Find the new Priority
+<span class="fc" id="L50">            State_of_Ticket stateOfTicket = stateOfTicketService.getReferencedById(</span>
+<span class="fc" id="L51">                    jsonNode.get(&quot;state&quot;).asInt()</span>
+            );
+            //Find the ticket
+<span class="fc" id="L54">            TicketTracking ticketTracking = ticketTrackingService.findById(</span>
+<span class="fc" id="L55">                    jsonNode.get(&quot;ticketNumber&quot;).asInt()</span>
+            );
+<span class="fc" id="L57">            ticketTracking.setState(stateOfTicket);</span>
+<span class="fc" id="L58">            ticketTracking.setDateLastUpdation(new Date());</span>
+<span class="fc" id="L59">            ticketTracking=ticketTrackingService.saveTicket(ticketTracking);</span>
+<span class="fc" id="L60">            historyOfCommunicationService.saveLog(</span>
+                    ticketTracking,
+<span class="fc" id="L62">                    &quot;Se cambio el estado del ticket a &quot;+(jsonNode.get(&quot;state&quot;).asText())</span>
+            );
+<span class="fc" id="L64">            return ResponseEntity.status(HttpStatus.OK).build();</span>
+<span class="fc" id="L65">        }catch(Exception ex){</span>
+<span class="fc" id="L66">            return new ResponseEntity&lt;&gt;(new Message(&quot;Error en cambio de estado del ticket: &quot;+ex.getMessage()), HttpStatus.BAD_REQUEST);</span>
+        }
+    }
+
+    @PostMapping(&quot;/solve&quot;)
+    public ResponseEntity&lt;?&gt; solve(@Validated @RequestBody String json,
+                             @RequestHeader(&quot;Authorization&quot;) String authorizationHeader){
+        try{
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">            if(!jwtChecker.initCheck(authorizationHeader)){</span>
+<span class="nc" id="L75">                return new ResponseEntity&lt;&gt;(new Message(&quot;Sesion invalida&quot;), HttpStatus.FORBIDDEN);</span>
+            }
+<span class="fc" id="L77">            JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);</span>
+<span class="fc" id="L78">            TicketTracking ticketTracking = ticketTrackingService.findById(</span>
+<span class="fc" id="L79">                    jsonNode.get(&quot;ticketNumber&quot;).asInt()</span>
+            );
+<span class="fc" id="L81">            ticketTracking.setProblemSolved(true);</span>
+<span class="fc" id="L82">            State_of_Ticket state = stateOfTicketService.getByState(&quot;cerrado&quot;);</span>
+<span class="fc" id="L83">            ticketTracking.setState(state);</span>
+<span class="fc" id="L84">            ticketTracking.setDateLastUpdation(new Date());</span>
+<span class="fc" id="L85">            ticketTracking=ticketTrackingService.saveTicket(ticketTracking);</span>
+<span class="fc" id="L86">            historyOfCommunicationService.saveLog(</span>
+                    ticketTracking,
+                    &quot;Se resolvio el ticket&quot;
+            );
+<span class="fc" id="L90">            return ResponseEntity.status(HttpStatus.OK).build();</span>
+<span class="nc" id="L91">        }catch(Exception ex){</span>
+<span class="nc" id="L92">            return new ResponseEntity&lt;&gt;(new Message(&quot;Error al resolver el ticket: &quot;+ex.getMessage()), HttpStatus.BAD_REQUEST);</span>
+        }
+    }
+
+    @PostMapping(&quot;/trackLogs&quot;)
+    public ResponseEntity&lt;?&gt; getLogs(@Validated @RequestBody String json){
+        try{
+<span class="fc" id="L99">            JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);</span>
+<span class="fc" id="L100">            int ticketNumber = jsonNode.get(&quot;ticketNumber&quot;).asInt();</span>
+<span class="fc" id="L101">            List&lt;Map&lt;String,Object&gt;&gt; list = historyOfCommunicationService.getLogs(ticketNumber);</span>
+<span class="fc" id="L102">            return new ResponseEntity&lt;&gt;(list, HttpStatus.OK);</span>
+<span class="nc" id="L103">        }catch(Exception ex){</span>
+<span class="nc" id="L104">            ex.printStackTrace();</span>
+<span class="nc" id="L105">            return new ResponseEntity&lt;&gt;(new Message(&quot;Error, no se pudieron obtener los logs: &quot;+ex.getMessage()), HttpStatus.BAD_REQUEST);</span>
+        }
+    }
+
+    @PostMapping(&quot;/assign-agent&quot;)
+    public ResponseEntity&lt;?&gt; assignAgent(@Validated @RequestBody String json,
+                                         @RequestHeader(&quot;Authorization&quot;) String authorizationHeader){
+        try{
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">            if (!jwtChecker.initCheck(authorizationHeader)) {</span>
+                // Registra una sesión inválida
+<span class="nc" id="L115">                return new ResponseEntity&lt;&gt;(new Message(&quot;Sesión inválida&quot;), HttpStatus.FORBIDDEN);</span>
+            }
+<span class="fc" id="L117">            JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);</span>
+<span class="fc" id="L118">            String agentUsername = jwtChecker.getSubject(authorizationHeader);</span>
+<span class="fc" id="L119">            User agent = userService.getUser(agentUsername);</span>
+<span class="fc" id="L120">            TicketTracking ticketTracking =  ticketTrackingService.findById(jsonNode.get(&quot;ticketNumber&quot;).asInt());</span>
+<span class="fc" id="L121">            ticketTracking.setAgent(agent);</span>
+<span class="fc" id="L122">            State_of_Ticket stateOfTicket = stateOfTicketService.getReferencedById(2);</span>
+<span class="fc" id="L123">            ticketTracking.setState(stateOfTicket);</span>
+<span class="fc" id="L124">            ticketTracking.setDateLastUpdation(new Date());</span>
+<span class="fc" id="L125">            ticketTracking = ticketTrackingService.saveTicket(ticketTracking);</span>
+<span class="fc" id="L126">            historyOfCommunicationService.saveLog(</span>
+                    ticketTracking,
+<span class="fc" id="L128">                    &quot;El ticket se asigno a &quot;+ticketTracking.getAgent().getName()+</span>
+<span class="fc" id="L129">                            &quot; &quot;+ticketTracking.getAgent().getLastName()+&quot; usuario &quot;+ticketTracking.getAgent().getUsername()</span>
+            );
+<span class="fc" id="L131">            return ResponseEntity.status(HttpStatus.CREATED).build();</span>
+<span class="nc" id="L132">        }catch(Exception ex){</span>
+<span class="nc" id="L133">            return new ResponseEntity&lt;&gt;(new Message(&quot;Error en cambio de agente en ticket: &quot;+ex.getMessage()), HttpStatus.BAD_REQUEST);</span>
+        }
+    }
+
+    @GetMapping(&quot;/get-agent-all&quot;)
+    public ResponseEntity&lt;?&gt; getAgentTickets(@RequestHeader(&quot;Authorization&quot;) String authorizationHeader){
+        try{
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">            if (!jwtChecker.initCheck(authorizationHeader)||</span>
+<span class="pc bpc" id="L141" title="1 of 2 branches missed.">                    !jwtChecker.getSubjectType(authorizationHeader).equalsIgnoreCase(&quot;2&quot;)) {</span>
+                // Registra una sesión inválida
+<span class="nc" id="L143">                return new ResponseEntity&lt;&gt;(new Message(&quot;Sesión inválida&quot;), HttpStatus.FORBIDDEN);</span>
+            }
+<span class="fc" id="L145">            User agent = userService.getUser(jwtChecker.getSubject(authorizationHeader));</span>
+<span class="fc" id="L146">            List&lt;Map&lt;String, Object&gt;&gt; listTokens = ticketTrackingService.getAgentTickets(agent.getIdUser());</span>
+
+<span class="fc" id="L148">            List&lt;Map&lt;String, Object&gt;&gt; modifiedList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">            for (Map&lt;String, Object&gt; map : listTokens) {</span>
+<span class="fc" id="L150">                Map&lt;String, Object&gt; modifiedMap = new HashMap&lt;&gt;(map); // Crear una copia modificable del mapa actual</span>
+<span class="fc" id="L151">                String ticket = modifiedMap.get(&quot;ticketNumber&quot;).toString();</span>
+<span class="fc" id="L152">                int ticketNumber = Integer.parseInt(ticket);</span>
+<span class="fc" id="L153">                List&lt;String&gt; elements = ticketService.getTicketsElements(ticketNumber);</span>
+<span class="fc" id="L154">                modifiedMap.put(&quot;files&quot;, elements);</span>
+<span class="fc" id="L155">                modifiedList.add(modifiedMap); // Agregar el mapa modificado a la nueva lista</span>
+<span class="fc" id="L156">            }</span>
+
+
+<span class="fc" id="L159">            return ResponseEntity.status(HttpStatus.OK).body(modifiedList);</span>
+<span class="nc" id="L160">        }catch(Exception ex){</span>
+<span class="nc" id="L161">            ex.printStackTrace();</span>
+<span class="nc" id="L162">            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Message(&quot;No se pudo obtener los tickets&quot;));</span>
+        }
+    }
+
+    @PostMapping(&quot;/visualize&quot;)
+    public ResponseEntity&lt;?&gt; visualize(@Validated @RequestBody String json){
+        try{
+<span class="fc" id="L169">            JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);</span>
+<span class="fc" id="L170">            int ticketNumber = jsonNode.get(&quot;ticketNumber&quot;).asInt();</span>
+<span class="fc" id="L171">            TicketTracking ticketTracking = ticketTrackingService.findById(ticketNumber);</span>
+<span class="fc" id="L172">            return new ResponseEntity&lt;&gt;(ticketTracking, HttpStatus.OK);</span>
+<span class="nc" id="L173">        }catch(Exception ex){</span>
+<span class="nc" id="L174">            return new ResponseEntity&lt;&gt;(new Message(&quot;Error en obtencion de datos del cliente &quot;+ex.getMessage()), HttpStatus.BAD_REQUEST);</span>
+        }
+    }
+
+    @PostMapping(&quot;/visualizeTicket&quot;)
+    public ResponseEntity&lt;?&gt; viewTicket(@Validated @RequestBody String json,
+                                        @RequestHeader(&quot;Authorization&quot;) String authorizationHeader){
+        try{
+            //Validacion del JWT
+<span class="fc" id="L183">            jwtChecker.checkJWT(authorizationHeader);</span>
+
+<span class="fc" id="L185">            JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);</span>
+<span class="fc" id="L186">            int ticketNumber = jsonNode.get(&quot;ticketNumber&quot;).asInt();</span>
+            //Obtener El track del ticket y el historial
+<span class="fc" id="L188">            TicketTracking ticketTracking = ticketTrackingService.findById(ticketNumber);</span>
+<span class="fc" id="L189">            List&lt;Map&lt;String,Object&gt;&gt; historyOfCommunication = historyOfCommunicationService.getLogs(ticketNumber);</span>
+
+            //Armar la respuesta
+<span class="fc" id="L192">            Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L193">            response.put(&quot;ticket&quot;, ticketTracking);</span>
+<span class="fc" id="L194">            response.put(&quot;history&quot;, historyOfCommunication);</span>
+<span class="fc" id="L195">            return new ResponseEntity&lt;&gt;(response, HttpStatus.OK);</span>
+<span class="nc" id="L196">        }catch(Exception ex){</span>
+<span class="nc" id="L197">            return new ResponseEntity&lt;&gt;(new Message(&quot;Error en obtencion de datos del cliente &quot;+ex.getMessage()), HttpStatus.BAD_REQUEST);</span>
+        }
+    }
+
+    @PostMapping(&quot;/saveMessage&quot;)
+    public ResponseEntity&lt;?&gt; saveMessage(@Validated @RequestBody String json){
+        try{
+<span class="nc" id="L204">            JsonNode jsonNode = new JsonOptions().parseStringJsonNode(json);</span>
+<span class="nc" id="L205">            SimpleDateFormat dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd'T'HH:mm:ss.SSS'Z'&quot;);</span>
+<span class="nc" id="L206">            String dateString = jsonNode.get(&quot;date&quot;).asText();</span>
+<span class="nc" id="L207">            History_of_CommunicationDTO dto = historyOfCommunicationService.saveMessage(</span>
+<span class="nc" id="L208">                    jsonNode.get(&quot;ticketNumber&quot;).asInt(),</span>
+<span class="nc" id="L209">                    jsonNode.get(&quot;description&quot;).asText(),</span>
+<span class="nc" id="L210">                    jsonNode.get(&quot;sent&quot;).asText(),</span>
+<span class="nc" id="L211">                    dateFormat.parse(dateString)</span>
+            );
+<span class="nc" id="L213">            return new ResponseEntity&lt;&gt;(dto, HttpStatus.OK);</span>
+<span class="nc" id="L214">        }catch(Exception ex){</span>
+
+<span class="nc" id="L216">            ex.printStackTrace();</span>
+<span class="nc" id="L217">            return new ResponseEntity&lt;&gt;(new Message(&quot;No se pudo enviar el mensaje &quot;+ex.getMessage()), HttpStatus.BAD_REQUEST);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

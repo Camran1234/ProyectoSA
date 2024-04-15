@@ -19,7 +19,7 @@ export const NavBar = () => {
                 
                 <Nav variant="underline" style={{marginTop:"1vh", marginRight: "1vw"}} >                                                            
                     <Nav.Item>
-                        <Nav.Link eventKey="link-2">FAQ</Nav.Link>
+                        <Nav.Link href="/faq" eventKey="link-2">FAQ</Nav.Link>
                     </Nav.Item>
                 </Nav>              
             </Nav>

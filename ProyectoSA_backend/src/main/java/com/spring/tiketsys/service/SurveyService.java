@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class SurveyService {
@@ -17,7 +18,7 @@ public class SurveyService {
         surveyRepository.saveAndFlush(survey);
     }
 
-    public List<SurveyDTO> getSurveys(){
+    public List<Map<String,Object>> getSurveys(){
         return surveyRepository.getSurveys();
     }
 

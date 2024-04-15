@@ -18,7 +18,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin
@@ -64,15 +66,23 @@ public class SurveyController {
         }
     }
 
-    @PostMapping("/getSurveys")
+    @PostMapping("/getDataReport")
     public ResponseEntity<?> getSurveys(@RequestHeader("Authorization") String authorizationHeader){
         try{
             jwtChecker.checkJWT(authorizationHeader);
-            return new ResponseEntity<>(surveyService.getSurveys(), HttpStatus.OK);
+            Map<String, Object> response = new HashMap<>();
+
+            response.put("unsolvedTickets", ticketService.getTicketsUnsolved());
+            response.put("unqualifiedTickets", ticketService.getTicketsUnqualified());
+            response.put("surveys", surveyService.getSurveys());
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         }catch(Exception ex){
+            ex.printStackTrace();
             return  new ResponseEntity<>(new Message("Error al obtener las encuestas"), HttpStatus.BAD_REQUEST);
         }
     }
+
+
 
     @PostMapping("/getCSV")
     public ResponseEntity<?> getCSV(@RequestHeader("Authorization") String authorizationHeader){

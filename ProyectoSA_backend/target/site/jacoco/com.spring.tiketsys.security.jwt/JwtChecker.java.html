@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtChecker.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tiketsys</a> &gt; <a href="index.source.html" class="el_package">com.spring.tiketsys.security.jwt</a> &gt; <span class="el_source">JwtChecker.java</span></div><h1>JwtChecker.java</h1><pre class="source lang-java linenums">package com.spring.tiketsys.security.jwt;
+
+import com.spring.tiketsys.dto.entity.User;
+import com.spring.tiketsys.dto.entity.UserType;
+import com.spring.tiketsys.security.exceptions.TicketException;
+import io.jsonwebtoken.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+
+
+/**
+ * Class to do protected methods
+ */
+@Component
+<span class="nc" id="L22">public class JwtChecker{</span>
+
+    @Value(&quot;${jwt.secret}&quot;)
+    String secret;
+    @Autowired
+    JwtProvider jwtProvider;
+
+
+    /**
+     * Main method to verify a token
+     * @param token
+     * @return
+     * @throws Exception
+     */
+    public boolean initCheck(String token) throws Exception{
+        try {
+<span class="nc" id="L38">            return this.checkSession(token);</span>
+<span class="nc" id="L39">        } catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L40">            return false;</span>
+        }
+    }
+
+    public void checkJWT(String token) throws TicketException {
+        try{
+<span class="nc" id="L46">            this.checkSession(token);</span>
+<span class="nc" id="L47">        }catch(Exception ex){</span>
+<span class="nc" id="L48">            throw new TicketException(&quot;Sesion Invalida&quot;);</span>
+<span class="nc" id="L49">        }</span>
+<span class="nc" id="L50">    }</span>
+
+    /**
+     * Obtiene el subject del token
+     * @param token
+     * @return
+     */
+    public String getSubject(String token)  {
+<span class="nc" id="L58">        return getClaim(token, &quot;username&quot;);</span>
+    }
+
+    public String getSubjectType(String token){
+<span class="nc" id="L62">        String userType = getClaim(token, &quot;user_type&quot;);</span>
+<span class="nc" id="L63">        return userType;</span>
+    }
+
+    private String getClaim(String token, String claim) {
+        try {
+<span class="nc" id="L68">            token = token.split(&quot; &quot;)[1].trim();</span>
+<span class="nc" id="L69">            byte[] secretBytes = secret.getBytes(StandardCharsets.UTF_8);</span>
+<span class="nc" id="L70">            Key secretKey = new SecretKeySpec(secretBytes, SignatureAlgorithm.HS256.getJcaName());</span>
+<span class="nc" id="L71">            Claims claims = Jwts.parserBuilder()</span>
+<span class="nc" id="L72">                    .setSigningKey(secretKey)</span>
+<span class="nc" id="L73">                    .build()</span>
+<span class="nc" id="L74">                    .parseClaimsJws(token)</span>
+<span class="nc" id="L75">                    .getBody();</span>
+<span class="nc" id="L76">            return claims.get(claim, String.class);</span>
+<span class="nc" id="L77">        } catch (Exception e) {</span>
+<span class="nc" id="L78">            e.printStackTrace();</span>
+<span class="nc" id="L79">            return null;</span>
+        }
+    }
+
+    /**
+     * Obtiene la expiracion del token
+     * @param token
+     * @return
+     */
+    public String getTokenExpiration(String token) throws NoSuchAlgorithmException {
+        try {
+<span class="nc" id="L90">            token = token.split(&quot; &quot;)[1].trim();</span>
+<span class="nc" id="L91">            byte[] secretBytes = secret.getBytes(StandardCharsets.UTF_8);</span>
+<span class="nc" id="L92">            Key secretKey = new SecretKeySpec(secretBytes, SignatureAlgorithm.HS256.getJcaName());</span>
+<span class="nc" id="L93">            Claims claims = Jwts.parserBuilder()</span>
+<span class="nc" id="L94">                    .setSigningKey(secretKey)</span>
+<span class="nc" id="L95">                    .build()</span>
+<span class="nc" id="L96">                    .parseClaimsJws(token)</span>
+<span class="nc" id="L97">                    .getBody();</span>
+<span class="nc" id="L98">            String dateFormatPattern = &quot;dd/MM/yyyy HH:mm:ss&quot;;</span>
+
+            // Create a SimpleDateFormat instance with the desired format
+<span class="nc" id="L101">            SimpleDateFormat dateFormat = new SimpleDateFormat(dateFormatPattern);</span>
+<span class="nc" id="L102">            return dateFormat.format(claims.getExpiration());</span>
+<span class="nc" id="L103">        } catch (Exception e) {</span>
+            // Handle exceptions
+<span class="nc" id="L105">            e.printStackTrace();</span>
+<span class="nc" id="L106">            return null;</span>
+        }
+    }
+
+    /**
+     * Regresa true si el token aun esta en sesion
+     * Regresa false si no esta en sesion
+     * @param token
+     * @return
+     * @throws JwtException
+     * @throws NoSuchAlgorithmException
+     */
+    public boolean checkSession(String token) throws Exception {
+<span class="nc" id="L119">        String result = this.getSubject(token);</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        if(result== null){</span>
+<span class="nc" id="L121">            throw new Exception(&quot;Sesion Invalida&quot;);</span>
+        }
+
+<span class="nc bnc" id="L124" title="All 4 branches missed.">        if(result.isEmpty() || result.isBlank()){</span>
+<span class="nc" id="L125">            throw new JwtException(&quot;Sesion Invalida&quot;);</span>
+        }
+        /*
+        Method only supported if user had a token method
+        CredentialDTO credentialDTO = credentialRepository.findCredentialDTOById(user_id);
+        Credential credential = DTOConverter.convertToCredentialEntity(credentialDTO);
+        if(credential.getUser_token() == null || credential.getUser_token().isBlank() ||
+                credential.getUser_token().isEmpty()){
+            throw new JwtException(&quot;No existe el token&quot;);
+        }*/
+<span class="nc" id="L135">        return jwtProvider.verifyJwt(token);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

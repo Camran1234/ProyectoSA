@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TicketElementService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tiketsys</a> &gt; <a href="index.source.html" class="el_package">com.spring.tiketsys.service</a> &gt; <span class="el_source">TicketElementService.java</span></div><h1>TicketElementService.java</h1><pre class="source lang-java linenums">package com.spring.tiketsys.service;
+
+import com.spring.tiketsys.dto.entity.Ticket;
+import com.spring.tiketsys.dto.entity.TicketElement;
+import com.spring.tiketsys.repository.TicketElementRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+
+@Service
+<span class="nc" id="L13">public class TicketElementService {</span>
+    @Autowired
+    private TicketElementRepository ticketElementRepository;
+
+    @Transactional
+    public TicketElement saveElement(Ticket ticket, String url){
+<span class="nc" id="L19">        int id = generateNextId(ticket.getTicketNumber());</span>
+<span class="nc" id="L20">        System.out.println(&quot;TicketElement Id:&quot;+id+&quot;, ticketNumber&quot;+ticket.getTicketNumber());</span>
+<span class="nc" id="L21">        return ticketElementRepository.saveAndFlush(new TicketElement(</span>
+                id,
+<span class="nc" id="L23">                ticket.getTicketNumber(),</span>
+                url
+        ));
+    }
+
+
+    @Transactional
+    public int generateNextId(int ticketNumber) {
+        // Consulta la base de datos para encontrar el máximo valor actual de idHistory para el ticketNumber dado
+<span class="nc" id="L32">        Optional&lt;Integer&gt; maxId = ticketElementRepository.findMaxIdForTicketElement(ticketNumber);</span>
+<span class="nc" id="L33">        int nextId = maxId.orElse(0) + 1;</span>
+<span class="nc" id="L34">        return nextId;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

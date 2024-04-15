@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Survey.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tiketsys</a> &gt; <a href="index.source.html" class="el_package">com.spring.tiketsys.dto.entity</a> &gt; <span class="el_source">Survey.java</span></div><h1>Survey.java</h1><pre class="source lang-java linenums">package com.spring.tiketsys.dto.entity;
+
+import com.spring.tiketsys.dto.ParserEntity;
+import com.spring.tiketsys.dto.model.SurveyDTO;
+import jakarta.persistence.*;
+import lombok.NonNull;
+
+@Entity
+@Table(name=&quot;Survey&quot;)
+public class Survey implements ParserEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name=&quot;idSurvey&quot;)
+    private int idSurvey;
+    @NonNull
+    @OneToOne
+    @JoinColumn(name = &quot;ticketNumber&quot;, referencedColumnName = &quot;ticketNumber&quot;)
+    private Ticket ticketNumber;
+    @NonNull
+    private int satisfaction;
+    @NonNull
+    private int timeService;
+    @NonNull
+    private int qualityService;
+
+<span class="nc" id="L26">    public Survey() {</span>
+<span class="nc" id="L27">    }</span>
+<span class="pc bpc" id="L28" title="1 of 2 branches missed.">    public Survey(@NonNull Ticket ticketNumber, @NonNull int satisfaction, @NonNull int timeService, @NonNull int qualityService) {</span>
+<span class="fc" id="L29">        this.ticketNumber = ticketNumber;</span>
+<span class="fc" id="L30">        this.satisfaction = satisfaction;</span>
+<span class="fc" id="L31">        this.timeService = timeService;</span>
+<span class="fc" id="L32">        this.qualityService = qualityService;</span>
+<span class="fc" id="L33">    }</span>
+
+    public int getIdSurvey() {
+<span class="nc" id="L36">        return idSurvey;</span>
+    }
+
+    public void setIdSurvey(int idSurvey) {
+<span class="nc" id="L40">        this.idSurvey = idSurvey;</span>
+<span class="nc" id="L41">    }</span>
+
+    public Ticket getTicketNumber() {
+<span class="nc" id="L44">        return ticketNumber;</span>
+    }
+
+    public void setTicketNumber(Ticket ticketNumber) {
+<span class="nc" id="L48">        this.ticketNumber = ticketNumber;</span>
+<span class="nc" id="L49">    }</span>
+
+    public int getSatisfaction() {
+<span class="nc" id="L52">        return satisfaction;</span>
+    }
+
+    public void setSatisfaction(int satisfaction) {
+<span class="nc" id="L56">        this.satisfaction = satisfaction;</span>
+<span class="nc" id="L57">    }</span>
+
+    public int getTimeService() {
+<span class="nc" id="L60">        return timeService;</span>
+    }
+
+    public void setTimeService(int timeService) {
+<span class="nc" id="L64">        this.timeService = timeService;</span>
+<span class="nc" id="L65">    }</span>
+
+    public int getQualityService() {
+<span class="nc" id="L68">        return qualityService;</span>
+    }
+
+    public void setQualityService(int qualityService) {
+<span class="nc" id="L72">        this.qualityService = qualityService;</span>
+<span class="nc" id="L73">    }</span>
+
+
+    @Override
+    public SurveyDTO parseToDTO() {
+<span class="nc" id="L78">        return new SurveyDTO(</span>
+<span class="nc" id="L79">                getIdSurvey(),</span>
+<span class="nc" id="L80">                getTicketNumber().getTicketNumber(),</span>
+<span class="nc" id="L81">                getSatisfaction(),</span>
+<span class="nc" id="L82">                getTimeService(),</span>
+<span class="nc" id="L83">                getQualityService());</span>
+    }
+
+    @Override
+    public Survey parseToEntity() {
+<span class="nc" id="L88">        return this;</span>
+    }
+
+    @Override
+    public String toCSV() {
+<span class="nc" id="L93">        StringBuffer string = new StringBuffer();</span>
+<span class="nc" id="L94">        string.append(getIdSurvey()+&quot;,&quot;);</span>
+<span class="nc" id="L95">        string.append(getTicketNumber().getTicketNumber()+&quot;,&quot;);</span>
+<span class="nc" id="L96">        string.append(getSatisfaction()+&quot;,&quot;);</span>
+<span class="nc" id="L97">        string.append(getTimeService()+&quot;,&quot;);</span>
+<span class="nc" id="L98">        string.append(getQualityService()+&quot;\n&quot;);</span>
+<span class="nc" id="L99">        return string.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

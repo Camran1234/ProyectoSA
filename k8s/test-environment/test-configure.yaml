@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: spring-service
-          image: us-central1-docker.pkg.dev/proyectosa-415901/docker-repository/maven_microservice_ticket_test:latest
+          image: us-central1-docker.pkg.dev/proyectosa-415901/docker-repository/maven_microservice_ticket:latest-test
           ports:
             - containerPort: 33065  # Puerto de tu aplicación Spring
 
@@ -61,7 +61,7 @@ spec:
     spec:
       containers:
         - name: mysql-service
-          image: us-central1-docker.pkg.dev/proyectosa-415901/docker-repository/mysql_microservice_test:latest
+          image: us-central1-docker.pkg.dev/proyectosa-415901/docker-repository/mysql_microservice:latest-test
           ports:
             - containerPort: 3306
 
@@ -96,12 +96,11 @@ spec:
     spec:
       containers:
         - name: react-service
-          image: us-central1-docker.pkg.dev/proyectosa-415901/docker-repository/node_microservice_frontend_test:latest
+          image: us-central1-docker.pkg.dev/proyectosa-415901/docker-repository/node_microservice_frontend:latest-test
           ports:
             - containerPort: 5173
 
 ---
-
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

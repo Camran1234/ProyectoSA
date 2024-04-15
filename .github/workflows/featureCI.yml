@@ -3,7 +3,7 @@ name: SA_Project CI
 on:
   push:
     branches:
-      - feature/test
+      - feature/*
     
 jobs:
   build_stage:
@@ -56,11 +56,14 @@ jobs:
       REGION_REGISTRY: us-central1-docker.pkg.dev
       PROJECT_ID: proyectosa-415901
       REPOSITORY: docker-repository
+      ENVIRONMENT: test
       
     steps:
+      # Copy code
       - name: Checkout and copy code to workflow
         uses: actions/checkout@v2
 
+      # Configure Nodejs and JVM
       - name: Configure Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
@@ -84,6 +87,7 @@ jobs:
       - name: 'Use gcloud CLI'
         run: 'gcloud info'
 
+      # TAG
       # Permisos
       - name: Set execute permissions for script
         run: chmod +x ./scripts/git_update.sh
@@ -92,7 +96,7 @@ jobs:
       - name: Automatic Tagging of Releases
         id: increment-git-tag
         run: |
-          ./scripts/git_update.sh -v minor        
+          ./scripts/git_update.sh -v patch        
         shell: bash
 
       # Debug Tag
@@ -116,40 +120,38 @@ jobs:
       - name: Push Docker Image to Artifact Registry MySQL Service
         env: 
           GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
-          IMAGE_NAME_MS: mysql_microservice_test       
+          IMAGE_NAME_MS: mysql_microservice
+          DIRECTORY: Documentation/    
         run: |
-          cd Documentation/
-          docker build -t $IMAGE_NAME_MS:latest .
-          docker tag $IMAGE_NAME_MS:latest $REGION_REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME_MS:latest
-          docker tag $IMAGE_NAME_MS:latest $REGION_REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME_MS:${{ steps.increment-git-tag.outputs.git-tag }}
-          docker push $REGION_REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME_MS:latest
-          docker push $REGION_REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME_MS:${{ steps.increment-git-tag.outputs.git-tag }}
+          bash scripts/build_and_push_image.sh --environment="$ENVIRONMENT" --directory="$DIRECTORY" --region="$REGION_REGISTRY" --project_id="$PROJECT_ID" --repository="$REPOSITORY" --image_name="$IMAGE_NAME_MS" --tag="$GIT_TAG" 
 
       - name: Push Docker Image to Artifact Registry Microservice Frontend
         env:
           GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
-          IMAGE_NAME_MS: node_microservice_frontend_test         
+          IMAGE_NAME_MS: node_microservice_frontend      
+          DIRECTORY: ProyectoSA_frontend/ 
         run: |
-          cd ProyectoSA_frontend/
-          docker build -t $IMAGE_NAME_MS:latest .
-          docker tag $IMAGE_NAME_MS:latest $REGION_REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME_MS:latest
-          docker tag $IMAGE_NAME_MS:latest $REGION_REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME_MS:${{ steps.increment-git-tag.outputs.git-tag }}
-          docker push $REGION_REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME_MS:latest
-          docker push $REGION_REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME_MS:${{ steps.increment-git-tag.outputs.git-tag }}
+          bash scripts/build_and_push_image.sh --environment="$ENVIRONMENT" --directory="$DIRECTORY" --region="$REGION_REGISTRY" --project_id="$PROJECT_ID" --repository="$REPOSITORY" --image_name="$IMAGE_NAME_MS" --tag="$GIT_TAG" 
 
       - name: Push Docker Image to Artifact Registry Microservice Ticket
         env:
           GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
-          IMAGE_NAME_MS: maven_microservice_ticket_test 
+          IMAGE_NAME_MS: maven_microservice_ticket
+          DIRECTORY: ProyectoSA_backend/ 
         run: |
-          cd ProyectoSA_backend/
-          docker build -t $IMAGE_NAME_MS:latest .
-          docker tag $IMAGE_NAME_MS:latest $REGION_REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME_MS:latest
-          docker tag $IMAGE_NAME_MS:latest $REGION_REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME_MS:${{ steps.increment-git-tag.outputs.git-tag }}
-          docker push $REGION_REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME_MS:latest
-          docker push $REGION_REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME_MS:${{ steps.increment-git-tag.outputs.git-tag }}
+          bash scripts/build_and_push_image.sh --environment="$ENVIRONMENT" --directory="$DIRECTORY" --region="$REGION_REGISTRY" --project_id="$PROJECT_ID" --repository="$REPOSITORY" --image_name="$IMAGE_NAME_MS" --tag="$GIT_TAG" 
   
       # Kubernets
+      - name: Deploy to GKE cluster - DELETE PREVIOUS VERSION
+        uses: ameydev/gke-kubectl-action@master
+        env:
+          PROJECT_ID: proyectosa-415901
+          APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS_BASE64 }}
+          CLUSTER_NAME: sa-test
+          ZONE_NAME: us-central1 
+        with:
+          args: delete -f k8s/test-environment/ || true
+
       - name: Deploy to GKE cluster
         uses: ameydev/gke-kubectl-action@master
         env:
@@ -161,5 +163,4 @@ jobs:
           args: apply -f k8s/test-environment/
   
             
-
 

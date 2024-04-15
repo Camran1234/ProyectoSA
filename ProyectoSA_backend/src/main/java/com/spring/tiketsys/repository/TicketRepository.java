@@ -11,6 +11,37 @@ import java.util.Map;
 
 public interface TicketRepository extends JpaRepository<Ticket, Integer> {
 
+
+    @Query(nativeQuery = true, value=
+            "SELECT * " +
+                    "FROM Ticket t " +
+                    "INNER JOIN TicketTracking tt " +
+                    "   ON t.ticketNumber=tt.ticketNumber " +
+                    "WHERE tt.problemSolved=0")
+    List<Map<String, Object>> getTicketsUnsolved();
+    @Query(nativeQuery = true, value=
+            "SELECT * " +
+                    "FROM Ticket t " +
+                    "INNER JOIN TicketTracking tt " +
+                    "   ON t.ticketNumber=tt.ticketNumber " +
+                    "WHERE tt.problemSolved=1")
+    List<Map<String, Object>> getTicketsSolved();
+
+    @Query(nativeQuery = true, value=
+            "SELECT * " +
+                    "FROM Ticket t " +
+                    "INNER JOIN TicketTracking tt " +
+                    "   ON t.ticketNumber=tt.ticketNumber " +
+                    "WHERE tt.surveyAvailable=1")
+    List<Map<String, Object>> getTicketsQualified();
+
+    @Query(nativeQuery = true, value=
+            "SELECT * " +
+                    "FROM Ticket t " +
+                    "INNER JOIN TicketTracking tt " +
+                    "   ON t.ticketNumber=tt.ticketNumber " +
+                    "WHERE tt.surveyAvailable=0 AND tt.problemSolved=1")
+    List<Map<String, Object>> getTicketsUnqualified();
     @Query(nativeQuery = true, value =
             "SELECT  " +
                     "    t.ticketNumber,  " +

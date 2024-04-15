@@ -20,6 +20,26 @@ public class TicketService {
     private TicketElementRepository ticketElementRepository;
 
     @Transactional
+    public List<Map<String,Object>> getTicketsUnsolved() {
+        return ticketRepository.getTicketsUnsolved();
+    }
+
+    @Transactional
+    public List<Map<String,Object>> getTicketsSolved() {
+         return ticketRepository.getTicketsSolved();
+    }
+
+    @Transactional
+    public List<Map<String,Object>> getTicketsQualified() {
+        return ticketRepository.getTicketsQualified();
+    }
+
+    @Transactional
+    public List<Map<String,Object>> getTicketsUnqualified(){
+        return ticketRepository.getTicketsUnqualified();
+    }
+
+    @Transactional
     public Ticket createTicket(Ticket ticket){
         return ticketRepository.saveAndFlush(ticket);
     }

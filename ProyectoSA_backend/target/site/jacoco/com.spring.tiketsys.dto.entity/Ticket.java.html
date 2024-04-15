@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Ticket.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tiketsys</a> &gt; <a href="index.source.html" class="el_package">com.spring.tiketsys.dto.entity</a> &gt; <span class="el_source">Ticket.java</span></div><h1>Ticket.java</h1><pre class="source lang-java linenums">package com.spring.tiketsys.dto.entity;
+
+import com.spring.tiketsys.dto.ParserEntity;
+import com.spring.tiketsys.dto.model.TicketDTO;
+import jakarta.persistence.*;
+import lombok.NonNull;
+
+@Entity
+@Table(name=&quot;Ticket&quot;)
+public class Ticket implements ParserEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column (name = &quot;ticketNumber&quot;)
+    private int ticketNumber;
+    @NonNull
+    @Column(name=&quot;email&quot;)
+    private String email;
+    @NonNull
+    @Column (name = &quot;name&quot;)
+    private String name;
+    @NonNull
+    @Column (name = &quot;lastName&quot;)
+    private String lastName;
+    @NonNull
+    @Column (name = &quot;phone&quot;)
+    private String phone;
+    @NonNull
+    @Column (name=&quot;description&quot;, columnDefinition = &quot;TEXT&quot;)
+    private String description;
+    @NonNull
+    @ManyToOne
+    @JoinColumn(name = &quot;ticketType&quot;, referencedColumnName = &quot;idTicketProblem&quot;)
+    private TicketType ticketType;
+    @NonNull
+    @ManyToOne
+    @JoinColumn(name = &quot;priority&quot;, referencedColumnName = &quot;idTicketPriority&quot;)
+    private TicketPriority priority;
+
+    @ManyToOne
+    @JoinColumn(name=&quot;owner&quot;, referencedColumnName = &quot;idUser&quot;)
+    private User owner;
+
+<span class="pc bpc" id="L43" title="7 of 14 branches missed.">    public Ticket(@NonNull String email, @NonNull String name, @NonNull String lastName, @NonNull String phone, @NonNull String description, @NonNull TicketType ticketType, @NonNull TicketPriority priority, User owner) {</span>
+<span class="fc" id="L44">        this.email = email;</span>
+<span class="fc" id="L45">        this.name = name;</span>
+<span class="fc" id="L46">        this.lastName = lastName;</span>
+<span class="fc" id="L47">        this.phone = phone;</span>
+<span class="fc" id="L48">        this.description = description;</span>
+<span class="fc" id="L49">        this.ticketType = ticketType;</span>
+<span class="fc" id="L50">        this.priority = priority;</span>
+<span class="fc" id="L51">        this.owner = owner;</span>
+<span class="fc" id="L52">    }</span>
+
+<span class="fc" id="L54">    public Ticket(){}</span>
+
+    public String getEmail() {
+<span class="nc" id="L57">        return email;</span>
+    }
+
+    public void setEmail(String email) {
+<span class="nc" id="L61">        this.email = email;</span>
+<span class="nc" id="L62">    }</span>
+
+    public User getOwner() {
+<span class="nc" id="L65">        return owner;</span>
+    }
+
+    public void setOwner(User owner) {
+<span class="nc" id="L69">        this.owner = owner;</span>
+<span class="nc" id="L70">    }</span>
+
+    public int getTicketNumber() {
+<span class="nc" id="L73">        return ticketNumber;</span>
+    }
+
+    public void setTicketNumber(int ticketNumber) {
+<span class="nc" id="L77">        this.ticketNumber = ticketNumber;</span>
+<span class="nc" id="L78">    }</span>
+
+    public String getName() {
+<span class="nc" id="L81">        return name;</span>
+    }
+
+    public void setName(String name) {
+<span class="nc" id="L85">        this.name = name;</span>
+<span class="nc" id="L86">    }</span>
+
+    public String getLastName() {
+<span class="nc" id="L89">        return lastName;</span>
+    }
+
+    public void setLastName(String lastName) {
+<span class="nc" id="L93">        this.lastName = lastName;</span>
+<span class="nc" id="L94">    }</span>
+
+    public String getPhone() {
+<span class="nc" id="L97">        return phone;</span>
+    }
+
+    public void setPhone(String phone) {
+<span class="nc" id="L101">        this.phone = phone;</span>
+<span class="nc" id="L102">    }</span>
+
+    public String getDescription() {
+<span class="nc" id="L105">        return description;</span>
+    }
+
+    public void setDescription(String description) {
+<span class="nc" id="L109">        this.description = description;</span>
+<span class="nc" id="L110">    }</span>
+
+    public TicketType getTicketType() {
+<span class="fc" id="L113">        return ticketType;</span>
+    }
+
+    public void setTicketType(TicketType ticketType) {
+<span class="nc" id="L117">        this.ticketType = ticketType;</span>
+<span class="nc" id="L118">    }</span>
+
+    public TicketPriority getPriority() {
+<span class="fc" id="L121">        return priority;</span>
+    }
+
+    public void setPriority(TicketPriority priority) {
+<span class="fc" id="L125">        this.priority = priority;</span>
+<span class="fc" id="L126">    }</span>
+
+    @Override
+    public TicketDTO parseToDTO() {
+<span class="nc" id="L130">        int ownerIdUser = 0;</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        if(owner != null){</span>
+<span class="nc" id="L132">            ownerIdUser = owner.getIdUser();</span>
+        }
+
+<span class="nc" id="L135">        return new TicketDTO(</span>
+                this.ticketNumber,
+                this.email,
+                this.name,
+                this.lastName,
+                this.phone,
+                this.description,
+<span class="nc" id="L142">                this.ticketType.getIdTicketProblem(),</span>
+<span class="nc" id="L143">                this.priority.getIdTicketPriority(),</span>
+                ownerIdUser
+        );
+    }
+
+    @Override
+    public Ticket parseToEntity() {
+<span class="nc" id="L150">        return this;</span>
+    }
+
+    @Override
+    public String toCSV() {
+<span class="nc" id="L155">        return null;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

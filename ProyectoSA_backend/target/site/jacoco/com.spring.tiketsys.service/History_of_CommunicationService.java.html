@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>History_of_CommunicationService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tiketsys</a> &gt; <a href="index.source.html" class="el_package">com.spring.tiketsys.service</a> &gt; <span class="el_source">History_of_CommunicationService.java</span></div><h1>History_of_CommunicationService.java</h1><pre class="source lang-java linenums">package com.spring.tiketsys.service;
+
+import com.spring.tiketsys.dto.entity.History_of_Communication;
+import com.spring.tiketsys.dto.entity.TicketTracking;
+import com.spring.tiketsys.dto.entity.compundkeys.History_of_CommunicationId;
+import com.spring.tiketsys.dto.model.History_of_CommunicationDTO;
+import com.spring.tiketsys.repository.History_of_CommunicationRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.annotation.ReadOnlyProperty;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
+
+@Service
+<span class="nc" id="L16">public class History_of_CommunicationService {</span>
+    @Autowired
+    private History_of_CommunicationRepository  historyOfCommunicationRepository;
+
+    public History_of_CommunicationDTO saveMessage(int ticketNumber, String message, String sent, Date nowDate){
+
+<span class="nc" id="L22">        int id = generateNextId(ticketNumber);</span>
+<span class="nc" id="L23">        History_of_Communication log = new History_of_Communication(</span>
+            id,
+            ticketNumber,
+            nowDate,
+            sent,
+            &quot;&quot;,
+            message
+        );
+<span class="nc" id="L31">        History_of_Communication result = historyOfCommunicationRepository.saveAndFlush(log);</span>
+<span class="nc" id="L32">        return result.parseToDTO();</span>
+    }
+
+    @Transactional
+    public void saveLog(TicketTracking ticketNumber, String activity){
+<span class="nc" id="L37">        Date nowDate = new Date();</span>
+<span class="nc" id="L38">        System.out.println(&quot;saveLog: &quot;+ticketNumber.getTicketNumber());</span>
+<span class="nc" id="L39">        int id = generateNextId(ticketNumber.getTicketNumber());</span>
+<span class="nc" id="L40">        System.out.println(&quot;Next ID: &quot;+id);</span>
+<span class="nc" id="L41">        History_of_Communication log = new History_of_Communication(</span>
+                id,
+<span class="nc" id="L43">                ticketNumber.getTicketNumber(),</span>
+                nowDate,
+                &quot;&quot;,
+                &quot;&quot;,
+                activity
+        );
+<span class="nc" id="L49">        historyOfCommunicationRepository.saveAndFlush(log);</span>
+<span class="nc" id="L50">    }</span>
+
+    @Transactional
+    public int generateNextId(int ticketNumber) {
+        // Consulta la base de datos para encontrar el máximo valor actual de idHistory para el ticketNumber dado
+<span class="nc" id="L55">        Optional&lt;Integer&gt; maxId = historyOfCommunicationRepository.findMaxIdForTicketNumber(ticketNumber);</span>
+<span class="nc" id="L56">        int nextId = maxId.orElse(0) + 1;</span>
+<span class="nc" id="L57">        return nextId;</span>
+    }
+
+
+
+    public List&lt;Map&lt;String,Object&gt;&gt; getLogs(int ticketNumber){
+        /*List&lt;History_of_Communication&gt; historyOfCommunications = historyOfCommunicationRepository.getLogs(ticketNumber);
+        List&lt;History_of_CommunicationDTO&gt; communicationDTOS = new ArrayList&lt;&gt;();
+        for(History_of_Communication historyOfCommunication: historyOfCommunications){
+            communicationDTOS.add(historyOfCommunication.parseToDTO());
+        }*/
+<span class="nc" id="L68">        return historyOfCommunicationRepository.getLogsNative(ticketNumber);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

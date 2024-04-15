@@ -15,6 +15,8 @@ import { AgentControl } from './pages/Agent/AgentControl/AgentControl';
 import { Register } from './pages/Home/Register/Register';
 import { Controller } from './pages/Admin/Controller/Controller';
 import { SearchTicketSurvey } from './pages/Client/Client/SearchTicketSurvey/SearchTicketSurvey';
+import { Report } from './pages/Admin/Report/Report';
+import { FAQ } from './pages/Client/Client/FAQ/FAQ';
 
 
 function App() {
@@ -35,10 +37,9 @@ function App() {
           }
 
           <Route element={<ProtectedRouteLogin redirectTo="/" />}>
-            <Route path="/login" element={<Login />} />
             <Route index path="/" element={<Login />} />            
+            <Route path="/login" element={<Login />} />            
           </Route>
-          <Route path="/register" element={<Register />} />
 
           { 
           //Para el cliente
@@ -47,7 +48,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/createTicket" element={<CreateTicket />} />
             <Route path="/find-ticket" element={<Home />} />
-            <Route path="/surveyTickets" element={<SearchTicketSurvey />} />
+            <Route path="/surveyTickets" element={<SearchTicketSurvey />} />            
           </Route>
 
           {
@@ -64,8 +65,14 @@ function App() {
             <Route path="/admin" element={<HomeAdmin />} />
             <Route path="/admin/register" element={<RegisterAdmin />} />
             <Route path="admin/controller" element={<Controller />} />
+            <Route path="admin/reports" element={<Report />} />
           </Route>
 
+          {
+            //Rutas no protegidas
+          }
+          <Route path="/register" element={<Register />} />
+          <Route path="/faq" element={<FAQ />} />
           
 
         </Routes>

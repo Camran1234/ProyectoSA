@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
       
     steps:
+      # Copy code
       - name: Checkout and copy code to workflow
         uses: actions/checkout@v2
-
             
       # Configurar credenciales de Google Cloud Platform
       - id: 'auth'
@@ -27,6 +27,16 @@ jobs:
         run: 'gcloud info'      
   
       # Kubernets
+      - name: Deploy to GKE cluster
+        uses: ameydev/gke-kubectl-action@master
+        env:
+          PROJECT_ID: proyectosa-415901
+          APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS_BASE64 }}
+          CLUSTER_NAME: sa-pr
+          ZONE_NAME: us-central1
+        with:
+          args: delete -f k8s/production-environment/ || true
+
       - name: Deploy to GKE cluster
         uses: ameydev/gke-kubectl-action@master
         env:
