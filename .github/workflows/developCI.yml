@@ -155,7 +155,7 @@ jobs:
         env:
           PROJECT_ID: proyectosa-415901
           APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS_BASE64 }}
-          CLUSTER_NAME: sa-de
+          CLUSTER_NAME: sa-develop
           ZONE_NAME: us-central1 
         with:
           args: delete -f k8s/development-environment/ || true
@@ -165,7 +165,7 @@ jobs:
         env:
           PROJECT_ID: proyectosa-415901
           APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS_BASE64 }}
-          CLUSTER_NAME: sa-de
+          CLUSTER_NAME: sa-develop
           ZONE_NAME: us-central1 
         with:
           args: apply -f k8s/development-environment/
