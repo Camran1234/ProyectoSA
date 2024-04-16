@@ -17,7 +17,7 @@ export const FAQ = ({hiddenData=false}) => {
                 <div className="container-faq" style={{marginTop:'10vh'}} >
                     <h1 className="tittle-class" >FAQ</h1>     
                         <div className="text-class">
-                            <h3 className="subtitle-class">¿Como puedo registrarme en el sistema?</h3>
+                            <h3 className="subtitle-class">¿Como puedo registrarme en el sistema? Esto es de maravilla</h3>
                             <p>
                                 Para registrarte en el sistema debes ubicarte en el inicio de la aplicación del sistema
                                 y seleccionar la opción de <strong>Registrate</strong>, posteriormente debes llenar los campos
@@ -31,7 +31,7 @@ export const FAQ = ({hiddenData=false}) => {
                             </p>
                         </div>     
                         <div className="text-class">
-                            <h3 className="subtitle-class">¿Como crear un ticket?</h3>
+                            <h3 className="subtitle-class">¿Como crear un ticket? - Calificacion F2 - G3</h3>
                             <p>
                                 De primero tienes que iniciar sesion en la aplicación y posteriormente seleccionar la opción
                                 <strong> Ticket {">"} Crear Ticket</strong> luego llena el formulario para crear un ticket
@@ -47,9 +47,9 @@ export const FAQ = ({hiddenData=false}) => {
                             </p>
                         </div>    
                         <div className="text-class">
-                            <h3 className="subtitle-class">¿Cómo rastreo un ticket que ya creé?</h3>
+                            <h3 className="subtitle-class">¿Cómo rastreo un ticket que ya creé? - Calificacion F2 - G3</h3>
                             <p>
-                                De primero te tienes que dirigir al menú de <strong>Ticket {">"} Rastrear Tickets</strong> una vez
+                                BLA BLA BLA De primero te tienes que dirigir al menú de <strong>Ticket {">"} Rastrear Tickets</strong> una vez
                                 que ya hayas iniciado la sesión en la aplicación. El sistema te indicará los tickets que son tuyos, 
                                 sin embargo, para buscar alguno en concreto puedes buscarlo en la barra de búsqueda con el correo
                                 que lo creaste. Luego selecciona el ticket que deseas rastrear y listo, se te desplegará los detalles
