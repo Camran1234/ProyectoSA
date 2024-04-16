@@ -39,7 +39,7 @@ const LoginForm = () => {
         <div className="container mt-5">
         <Card className="ticket-card">
             <Card.Body>
-            <Card.Title className="text-center" >Iniciar Sesión</Card.Title>
+            <Card.Title className="text-center" >Iniciar Sesión - Calificacion F2 - Aux</Card.Title>
             <Form onSubmit={(e) => handleSubmit(e)}>
                 <Form.Group className="mb-3 mt-5" controlId="usernameId">
                     <Form.Label>Username</Form.Label>
