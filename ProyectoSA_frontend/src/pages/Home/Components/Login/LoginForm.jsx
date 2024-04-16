@@ -39,10 +39,10 @@ const LoginForm = () => {
         <div className="container mt-5">
         <Card className="ticket-card">
             <Card.Body>
-            <Card.Title className="text-center" >Iniciar Sesión</Card.Title>
+            <Card.Title className="text-center" >Iniciar Sesión - Calificacion F2 - Aux Nuevo</Card.Title>
             <Form onSubmit={(e) => handleSubmit(e)}>
                 <Form.Group className="mb-3 mt-5" controlId="usernameId">
-                    <Form.Label>Username</Form.Label>
+                    <Form.Label>Username  - Calificacion F2 - Aux Nuevo</Form.Label>
                     <Form.Control  
                     type="text" 
                     value={username}
@@ -50,7 +50,7 @@ const LoginForm = () => {
                     required/>                            
                 </Form.Group>
                 <Form.Group className="mb-3 mt-5" controlId="passwordId">
-                    <Form.Label>Password</Form.Label>
+                    <Form.Label>Password - Calificacion F2 - Aux Nuevo</Form.Label>
                     <Form.Control  
                     type="password" 
                     value={password}
