@@ -118,7 +118,7 @@ jobs:
       - name: Push Docker Image to Artifact Registry MySQL Service
         env: 
           GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
-          IMAGE_NAME_MS: mysql_microservice
+          IMAGE_NAME_MS: data_service
           DIRECTORY: Documentation/    
         run: |
           bash scripts/build_and_push_image_dockerhub.sh --environment="$ENVIRONMENT" --directory="$DIRECTORY"  --repository="${{ secrets.DOCKERHUB_USERNAME }}" --image_name="$IMAGE_NAME_MS" --tag="$GIT_TAG" 
