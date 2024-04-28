@@ -53,32 +53,27 @@ jobs:
   delivery-stage:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version:
-          - 21.7.0        
-        java-version:
-          - 17
-
     env:
       ENVIRONMENT: test
-      
+    
+    # Establecemos los directorios y nombres de imagen, de los Docker
+    strategy:
+      matrix:
+        image_name: [data_service, maven_microservice_ticket]
+        directory: [Documentation/, ProyectoSA_backend/]
+
     steps:
       # Copy code
       - name: Checkout and copy code to workflow
         uses: actions/checkout@v2
 
-      # Configurar credenciales de Google Cloud Platform
-      #- id: 'auth'
-      #  uses: 'google-github-actions/auth@v2'
-      #  with:
-      #    credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+      # Configure docker Buildx
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-      #- name: 'Set up Cloud SDK'
-      #  uses: 'google-github-actions/setup-gcloud@v2'
-
-      #- name: 'Use gcloud CLI'
-      #  run: 'gcloud info'
+      # Autenticación con Dockerhub      
+      - name: Iniciar sesión en Dockerhub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
       # TAG
       # Permisos
@@ -96,69 +91,40 @@ jobs:
       - name: Debug Git Tag
         run: |
           echo "Git Tag: <${{ steps.increment-git-tag.outputs.git-tag }}>"      
-
-      # Configurar Docker con autenticación de Google Cloud
-      #- name: Configure Docker
-      #  run: |
-      #    gcloud auth configure-docker --quiet
-      #    gcloud auth configure-docker $REGION_REGISTRY --quiet
           
-      # Autentica con Dockerhub
-      - name: Iniciar sesión en Dockerhub
-        run: |
-          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
-
       # Configurar .env frontend
       - name: Configure frontend environment variables
         run: |        
           cd ProyectoSA_frontend/
           echo "${{ secrets.TEST_ENVIRONMENT }}" >> .env
 
-      # Configurar dockers
-      - name: Push Docker Image to Artifact Registry MySQL Service
-        env: 
-          GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
-          IMAGE_NAME_MS: data_service
-          DIRECTORY: Documentation/    
-        run: |
-          bash scripts/build_and_push_image_dockerhub.sh --environment="$ENVIRONMENT" --directory="$DIRECTORY"  --repository="${{ secrets.DOCKERHUB_USERNAME }}" --image_name="$IMAGE_NAME_MS" --tag="$GIT_TAG" 
-
-      #- name: Push Docker Image to Artifact Registry Microservice Frontend
-      #  env:
-      #    GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
-      #    IMAGE_NAME_MS: node_microservice_frontend      
-      #    DIRECTORY: ProyectoSA_frontend/ 
-      #  run: |
-      #    bash scripts/build_and_push_image.sh --environment="$ENVIRONMENT" --directory="$DIRECTORY" --region="$REGION_REGISTRY" --project_id="$PROJECT_ID" --repository="$REPOSITORY" --image_name="$IMAGE_NAME_MS" --tag="$GIT_TAG" 
-
-      - name: Push Docker Image to Artifact Registry Microservice Ticket
+      # Construir y empujar imágenes Docker
+      - name: Build and push Docker images
         env:
           GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
-          IMAGE_NAME_MS: maven_microservice_ticket
-          DIRECTORY: ProyectoSA_backend/ 
+          REPOSITORY: ${{ secrets.DOCKERHUB_USERNAME }}        
         run: |
-          bash scripts/build_and_push_image_dockerhub.sh --environment="$ENVIRONMENT" --directory="$DIRECTORY"  --repository="${{ secrets.DOCKERHUB_USERNAME }}" --image_name="$IMAGE_NAME_MS" --tag="$GIT_TAG"
-  
-      # Kubernets
-      #- name: Deploy to GKE cluster - DELETE PREVIOUS VERSION
-      #  uses: ameydev/gke-kubectl-action@master
-      #  env:
-      #    PROJECT_ID: proyectosa-415901
-      #    APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS_BASE64 }}
-      #    CLUSTER_NAME: sa-test
-      #    ZONE_NAME: us-central1 
-      #  with:
-      #    args: delete -f k8s/test-environment/ || true
+          bash scripts/build_and_push_image_dockerhub.sh --environment="${{ env.ENVIRONMENT }}" --directory="${{ matrix.directory }}" --repository="${{ secrets.DOCKERHUB_USERNAME }}" --image_name="${{ matrix.image_name }}" --tag="${{ env.GIT_TAG }}"
 
-      #- name: Deploy to GKE cluster
-      #  uses: ameydev/gke-kubectl-action@master
-      #  env:
-      #    PROJECT_ID: proyectosa-415901
-      #    APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS_BASE64 }}
-      #    CLUSTER_NAME: sa-test
-      #    ZONE_NAME: us-central1 
-      #  with:
-      #    args: apply -f k8s/test-environment/
-  
-            
+      - name: Obtener el tag más reciente
+        id: obtener-tag
+        run: |
+          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo "::set-output name=latest_tag::$latest_tag"
 
+      - name: Usar el tag obtenido
+        run: echo "El tag más reciente es ${{ steps.obtener-tag.outputs.latest_tag }}"
+
+      # Desplegar
+      - name: Deploy
+        env:
+          #ENVIRONMENT: ${{ env.ENVIRONMENT }}
+          GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
+        run: |
+          sed -i "s/\${REPOSITORY}/$(echo ${{ secrets.DOCKERHUB_USERNAME }})/g" k8s/k8s-configure.yaml
+          sed -i "s/\${TAG}/$(echo ${GIT_TAG})/g" k8s/k8s-configure.yaml
+          sed -i "s/\${ENVIRONMENT}/$(echo ${ENVIRONMENT})/g" k8s/k8s-configure.yaml
+          cat k8s/k8s-configure.yaml
+      #    kubectl apply -f k8s/
+          
+      
