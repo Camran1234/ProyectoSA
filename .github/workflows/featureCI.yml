@@ -120,9 +120,11 @@ jobs:
         env:
           GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
           REPOSITORY: ${{ secrets.DOCKERHUB_USERNAME }}
+          #Agregar en este apartado la imagen del frontend
           IMAGES_DIRECTORIES: |
             data_service:Documentation/
-            maven_microservice_ticket:ProyectoSA_backend/  
+            maven_microservice_ticket:ProyectoSA_backend/
+              
         # Iterate over each pair and build/push Docker images
         run: |
           for pair in $IMAGES_DIRECTORIES; do
@@ -159,5 +161,28 @@ jobs:
         run: |
           kubectl apply -f k8s/
         continue-on-error: true
+
+      ## Set up terraform
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.2.1.
+
+      ## Moving to the terraform test deployment
+      - name: Move to the terraform directory
+        run: cd deploy_frontend/terraform/test
+
+      ## Terraform init
+      - name: Init terraform
+        run: terraform init
+
+      ## Terraform plan
+      - name: Plan terraform
+        run: terraform plan -out=tfplan
+      
+      ## Terraform apply
+      - name: Apply terraform
+        run: terraform apply tfplan -auto-approve
+
           
       
