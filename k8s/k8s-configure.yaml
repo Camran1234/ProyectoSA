@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: mysql-service
-          image: ${REPOSITORY}/data_service:${TAG}}-${ENVIRONMENT} 
+          image: ${REPOSITORY}/data_service:${TAG}-${ENVIRONMENT} 
           ports:
             - containerPort: 3306
             
@@ -61,7 +61,7 @@ spec:
     spec:
       containers:
         - name: spring-service
-          image: ${REPOSITORY}/maven_microservice_ticket:${TAG}}-${ENVIRONMENT}
+          image: ${REPOSITORY}/maven_microservice_ticket:${TAG}-${ENVIRONMENT}
           ports:
             - containerPort: 33065  # Puerto de tu aplicación Spring
 

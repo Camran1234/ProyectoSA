@@ -56,12 +56,6 @@ jobs:
     env:
       ENVIRONMENT: test
     
-    # Establecemos los directorios y nombres de imagen, de los Docker
-    strategy:
-      matrix:
-        image_name: [data_service, maven_microservice_ticket]
-        directory: [Documentation/, ProyectoSA_backend/]
-
     steps:
       # Copy code
       - name: Checkout and copy code to workflow
@@ -105,10 +99,19 @@ jobs:
       - name: Build and push Docker images
         env:
           GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
-          REPOSITORY: ${{ secrets.DOCKERHUB_USERNAME }}        
+          REPOSITORY: ${{ secrets.DOCKERHUB_USERNAME }}
+          IMAGES_DIRECTORIES: | # Establecemos los directorios y nombres de imagen, de los Docker
+            data_service: Documentation/
+            maven_microservice_ticket: ProyectoSA_backend/        
         run: |
-          bash scripts/build_and_push_image_dockerhub.sh --environment="${{ env.ENVIRONMENT }}" --directory="${{ matrix.directory }}" --repository="${{ secrets.DOCKERHUB_USERNAME }}" --image_name="${{ matrix.image_name }}" --tag="${{ env.GIT_TAG }}"
+          for pair in $IMAGES_DIRECTORIES; do
+            IFS=':' read -r image_name directory <<< "$pair"
+            bash scripts/build_and_push_image_dockerhub.sh \
+              --environment="${{ env.ENVIRONMENT }}" --directory="${directory}" \
+              --repository="${{ env.REPOSITORY }}"   --image_name="${image_name}" --tag="${{ env.GIT_TAG }}"
+          done
 
+      #Test tag production
       - name: Obtener el tag más reciente
         id: obtener-tag
         run: |
