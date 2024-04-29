@@ -124,7 +124,7 @@ jobs:
           IMAGES_DIRECTORIES: |
             data_service:Documentation/
             maven_microservice_ticket:ProyectoSA_backend/
-              
+            frontend_microservice_ticket:ProyectoSA_frontend/
         # Iterate over each pair and build/push Docker images
         run: |
           for pair in $IMAGES_DIRECTORIES; do
@@ -168,21 +168,23 @@ jobs:
         with:
           terraform_version: 1.2.1.
 
-      ## Moving to the terraform test deployment
-      - name: Move to the terraform directory
-        run: cd deploy_frontend/terraform/test
-
       ## Terraform init
       - name: Init terraform
-        run: terraform init
+        run: |
+          cd deploy_frontend/terraform/test
+          terraform init
 
       ## Terraform plan
       - name: Plan terraform
-        run: terraform plan -out=tfplan
+        run: |
+          cd deploy_frontend/terraform/test
+          terraform plan -out=tfplan
       
       ## Terraform apply
       - name: Apply terraform
-        run: terraform apply tfplan -auto-approve
+        run: |
+          cd deploy_frontend/terraform/test
+          terraform apply tfplan -auto-approve
 
           
       
