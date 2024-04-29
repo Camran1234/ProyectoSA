@@ -23,6 +23,33 @@
         state: latest
         update_cache: true
 
+    - name: Install kubectl
+      snap:
+        name: kubectl
+        classic: yes    
+
+    - name: Pass the kubeconfig file to the client
+      ansible.builtin.copy:
+        src: "{{ kubespray_conf }}"
+        dest: /etc/systemd/system/kubespray-do.conf
+
+    - name: Create systemd unit file for kubectl port-forward
+      template:
+        src: "{{ forward_service }}"  # Archivo de plantilla para la unidad systemd
+        dest: /etc/systemd/system/kubectl-port-forward.service  # Ruta remota donde se colocará el archivo de unidad systemd
+      notify:
+        - Restart kubectl-port-forward service
+
+    - name: Reload systemd daemon
+      ansible.builtin.systemd:
+        daemon_reload: yes
+
+    - name: Start kubectl-port-forward service
+      systemd:
+        name: kubectl-port-forward
+        state: started
+        enabled: yes
+
     - name: Add Docker GPG apt Key
       apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
@@ -66,3 +93,8 @@
         pull: true
         ports:
           - "80:5173"
+  handlers:
+    - name: Restart kubectl-port-forward service
+      systemd:
+        name: kubectl-port-forward
+        state: restarted
