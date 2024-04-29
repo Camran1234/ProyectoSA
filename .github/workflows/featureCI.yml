@@ -111,10 +111,6 @@ jobs:
           cd ProyectoSA_frontend/
           echo "${{ secrets.TEST_ENVIRONMENT }}" >> .env
 
-      # Ejecutar ansible frontend para ENVIRONMENT
-      #- name: Run Ansible playbook
-      #  run: ansible-playbook my_playbook.yml
-
       # Construir y empujar imágenes Docker
       - name: Build and push Docker images
         env:
@@ -186,5 +182,21 @@ jobs:
           cd deploy_frontend/terraform/test
           terraform apply -auto-approve
 
+      # Preparar playbook
+      - name: Prepare playbook
+        env:
+          #ENVIRONMENT: ${{ env.ENVIRONMENT }}
+          GIT_TAG: ${{ steps.obtener-tag.outputs.latest_tag }}
+        run: |
+          sed -i "s/\${REPOSITORY}/$(echo ${{ secrets.DOCKERHUB_USERNAME }})/g" deploy_frontend/ansible/test/client-ansible.yaml
+          sed -i "s/\${TAG}/$(echo ${GIT_TAG})/g" deploy_frontend/ansible/test/client-ansible.yaml
+          sed -i "s/\${ENVIRONMENT}/$(echo ${ENVIRONMENT})/g" deploy_frontend/ansible/test/client-ansible.yaml
+          cat deploy_frontend/ansible/test/client-ansible.yaml
+          
+   # Ejecutar ansible frontend para ENVIRONMENT
+      - name: Run Ansible playbook
+        run: |
+          cd deploy_frontend/ansible/test
+          ansible-playbook -i inventory.ini client-ansible.yaml
           
       
