@@ -101,10 +101,8 @@ jobs:
           GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
           REPOSITORY: ${{ secrets.DOCKERHUB_USERNAME }}
           IMAGES_DIRECTORIES: |
-            - image_name: data_service
-              directory: Documentation/
-            - image_name: maven_microservice_ticket
-              directory: ProyectoSA_backend/
+            data_service:Documentation/
+            maven_microservice_ticket:ProyectoSA_backend/
   
         # Iterate over each pair and build/push Docker images
         run: |
