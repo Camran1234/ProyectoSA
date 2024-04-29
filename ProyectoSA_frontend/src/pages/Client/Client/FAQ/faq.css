@@ -36,6 +36,7 @@
     overflow-y: auto;
     scroll-behavior: smooth;
     max-width: 75%;
-    width: 75%;
+    width: 75%;    
+    height: 75vh;
     font-family: 'Courier New', Courier, monospace;
 }
