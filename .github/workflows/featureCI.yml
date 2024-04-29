@@ -102,7 +102,7 @@ jobs:
           REPOSITORY: ${{ secrets.DOCKERHUB_USERNAME }}
           IMAGES_DIRECTORIES: | # Establecemos los directorios y nombres de imagen, de los Docker
             data_service: Documentation/
-            maven_microservice_ticket: ProyectoSA_backend/        
+            maven_microservice_ticket: ProyectoSA_backend/
         run: |
           for pair in $IMAGES_DIRECTORIES; do
             IFS=':' read -r image_name directory <<< "$pair"
