@@ -158,6 +158,11 @@ jobs:
           kubectl apply -f k8s/
         continue-on-error: true
 
+      # Dar permisos a las llaves
+      - name: Give privileges to keys
+        run: |
+          chmod 600 deploy_frontend/resources/test/test_rsa
+          chmod 600 deploy_frontend/resources/test/test_rsa.pub
       ## Set up terraform
       #- name: Set up Terraform
       #  uses: hashicorp/setup-terraform@v1
@@ -181,6 +186,7 @@ jobs:
       #  run: |
       #    cd deploy_frontend/terraform/test
       #    terraform apply -auto-approve
+      #  continue-on-error: true
 
       # Preparar playbook
       - name: Prepare playbook
@@ -191,8 +197,8 @@ jobs:
           sed -i "s/\${REPOSITORY}/$(echo ${{ secrets.DOCKERHUB_USERNAME }})/g" deploy_frontend/ansible/test/client-ansible.yaml
           sed -i "s/\${TAG}/$(echo ${GIT_TAG})/g" deploy_frontend/ansible/test/client-ansible.yaml
           sed -i "s/\${ENVIRONMENT}/$(echo ${ENVIRONMENT})/g" deploy_frontend/ansible/test/client-ansible.yaml
-          cat deploy_frontend/ansible/test/client-ansible.yaml
-          
+          cat deploy_frontend/ansible/test/client-ansible.yaml      
+    
    # Ejecutar ansible frontend para ENVIRONMENT
       - name: Run Ansible playbook
         run: |
