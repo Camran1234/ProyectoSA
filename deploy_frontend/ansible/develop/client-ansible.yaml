@@ -55,14 +55,14 @@
       
     - name: Pull default Docker image
       community.docker.docker_image:
-        name: "camran1234/proyectosa_frontend"
+        name: ${REPOSITORY}/frontend_microservice_ticket:${TAG}-${ENVIRONMENT} 
         source: pull
 
     - name: ensure a container is running
       docker_container:
         name: "frontend"
         state: started
-        image: "camran1234/proyectosa_frontend"
+        image: ${REPOSITORY}/frontend_microservice_ticket:${TAG}-${ENVIRONMENT} 
         pull: true
         ports:
           - "80:5173"

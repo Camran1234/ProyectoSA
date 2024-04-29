@@ -164,29 +164,29 @@ jobs:
           chmod 600 deploy_frontend/resources/test/test_rsa
           chmod 600 deploy_frontend/resources/test/test_rsa.pub
       ## Set up terraform
-      #- name: Set up Terraform
-      #  uses: hashicorp/setup-terraform@v1
-      #  with:
-      #    terraform_version: 1.2.1.
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.2.1.
 
       ## Terraform init
-      #- name: Init terraform
-      #  run: |
-      #    cd deploy_frontend/terraform/test
-      #    terraform init
+      - name: Init terraform
+        run: |
+          cd deploy_frontend/terraform/test
+          terraform init
 
       ## Terraform plan
-      #- name: Plan terraform
-      #  run: |
-      #    cd deploy_frontend/terraform/test
-      #    terraform plan
+      - name: Plan terraform
+        run: |
+          cd deploy_frontend/terraform/test
+          terraform plan
       
       ## Terraform apply
-      #- name: Apply terraform
-      #  run: |
-      #    cd deploy_frontend/terraform/test
-      #    terraform apply -auto-approve
-      #  continue-on-error: true
+      - name: Apply terraform
+        run: |
+          cd deploy_frontend/terraform/test
+          terraform apply -auto-approve
+        continue-on-error: true
 
       # Preparar playbook
       - name: Prepare playbook
