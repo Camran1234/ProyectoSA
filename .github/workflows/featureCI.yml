@@ -178,13 +178,13 @@ jobs:
       - name: Plan terraform
         run: |
           cd deploy_frontend/terraform/test
-          terraform plan -out=tfplan
+          terraform plan
       
       ## Terraform apply
       - name: Apply terraform
         run: |
           cd deploy_frontend/terraform/test
-          terraform apply tfplan -auto-approve
+          terraform apply -auto-approve
 
           
       
