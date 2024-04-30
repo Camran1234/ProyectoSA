@@ -76,13 +76,12 @@ jobs:
 
       - name: Configure kubeconfig
         run: |
-          echo "${{ secrets.KUBECONFIG_DATA_TEST }}" > ./kubespray-do.conf
-          export KUBECONFIG=$PWD/kubespray-do.conf
+          echo "${{ secrets.KUBECONFIG_DATA_TEST }}" > ./kubeconfig
+          export KUBECONFIG=$PWD/kubeconfig
 
       - name: Print KUBECONFIG
         run: |
-          echo "KUBECONFIG location: $KUBECONFIG"
-          kubectl config view
+          kubectl get pods
 
       # Configure Ansible
       - name: Install Ansible
@@ -196,7 +195,7 @@ jobs:
         run: |
           cd deploy_frontend/terraform/test
           terraform apply -auto-approve
-        continue-on-error: true
+        # continue-on-error: true
 
       # Preparar playbook
       - name: Prepare playbook
