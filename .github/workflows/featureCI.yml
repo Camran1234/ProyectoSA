@@ -31,18 +31,18 @@ jobs:
           java-version: ${{ matrix.java-version }}
           distribution: 'adopt'
 
-      #  Configurar microservicios
-      # - name: Install and Build Microservice frontend
-      #   run: |
-      #     cd ProyectoSA_frontend/
-      #     npm install
+      # Configurar microservicios
+      - name: Install and Build Microservice frontend
+        run: |
+          cd ProyectoSA_frontend/
+          npm install
 
       - name: Install and Build Microservice tickets
         run: |
           cd ProyectoSA_backend/
-          mvn clean install -U
-          mvn clean package
-          mvn clean test jacoco:report
+          mvn -T 1C -B -q clean install -U
+          mvn -T 1C -B -q clean package
+          mvn -T 1C -q clean test jacoco:report
     
       - name: Publish JaCoCo report artifacts
         uses: actions/upload-artifact@v2
@@ -78,6 +78,11 @@ jobs:
         run: |
           echo "${{ secrets.KUBECONFIG_DATA_TEST }}" > ./kubespray-do.conf
           export KUBECONFIG=$PWD/kubespray-do.conf
+
+      - name: Print KUBECONFIG
+        run: |
+          echo "KUBECONFIG location: $KUBECONFIG"
+          kubectl config view
 
       # Configure Ansible
       - name: Install Ansible
