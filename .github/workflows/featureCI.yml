@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      ENVIRONMENT: test_env
+      ENVIRONMENT: test-env
     
     steps:
       # Copy code
