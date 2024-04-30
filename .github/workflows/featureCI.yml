@@ -74,6 +74,11 @@ jobs:
         #  sudo apt-get update
         #  sudo apt-get install -y kubectl
 
+      - name: Configure kubeconfig
+        run: |
+          echo "${{ secrets.KUBECONFIG_DATA_TEST }}" > ./kubespray-do.conf
+          export KUBECONFIG=$PWD/kubespray-do.conf
+
       # Configure Ansible
       - name: Install Ansible
         run: |
