@@ -82,7 +82,7 @@ jobs:
 
       - name: Print KUBECONFIG
         run: |
-          kubectl get pods --all-namespaces
+          kubectl --kubeconfig=kubeconfig get pods --all-namespaces
 
       # Configure Ansible
       - name: Install Ansible
