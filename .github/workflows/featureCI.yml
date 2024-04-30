@@ -165,8 +165,8 @@ jobs:
       # Desplegar
       - name: Deploy
         run: |
-          kubectl apply -f k8s/
-        continue-on-error: true
+          kubectl --kubeconfig=kubeconfig apply -f k8s/
+        # continue-on-error: true
 
       # Dar permisos a las llaves
       - name: Give privileges to keys
@@ -196,7 +196,7 @@ jobs:
         run: |
           cd deploy_frontend/terraform/test
           terraform apply -auto-approve
-        # continue-on-error: true
+        continue-on-error: true
 
       # Preparar playbook
       - name: Prepare playbook
