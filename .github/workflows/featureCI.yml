@@ -74,9 +74,9 @@ jobs:
         #  sudo apt-get update
         #  sudo apt-get install -y kubectl
 
-      - name: Configure kubeconfig
+      - name: Configure kubeconfig # KUBECONFIG_DATA_TEST para test environment
         run: |
-          echo "${{ secrets.KUBECONFIG_DATA_TEST }}" > ./kubeconfig
+          echo "${{ secrets.KUBECONFIG_DATA_DEV }}" > ./kubeconfig
           cat kubeconfig
           export KUBECONFIG=$PWD/kubeconfig
 
