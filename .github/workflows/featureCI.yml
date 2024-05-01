@@ -76,7 +76,8 @@ jobs:
 
       - name: Configure kubeconfig # KUBECONFIG_DATA_TEST para test environment
         run: |
-          echo "${{ secrets.KUBECONFIG_DATA_DEV }}" > ./kubeconfig
+          echo "${{ secrets.KUBECONFIG_DATA_TEST }}" > ./kubeconfig
+          echo "${{ secrets.KUBECONFIG_DATA_TEST }}" > ./deploy_frontend/resources/test/kubespray-do.conf
           cat kubeconfig
           export KUBECONFIG=$PWD/kubeconfig
 
