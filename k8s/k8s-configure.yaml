@@ -51,6 +51,7 @@ spec:
     - protocol: TCP
       port: 33065
       targetPort: 33065
+  type: LoadBalancer
 
 ---
 apiVersion: apps/v1
@@ -73,6 +74,8 @@ spec:
           image: ${REPOSITORY}/maven_microservice_ticket:${TAG}-${ENVIRONMENT}
           ports:
             - containerPort: 33065  # Puerto de tu aplicación Spring
+
+
 
 #---
 #apiVersion: networking.k8s.io/v1
