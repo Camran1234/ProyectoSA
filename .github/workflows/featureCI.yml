@@ -40,9 +40,9 @@ jobs:
       - name: Install and Build Microservice tickets
         run: |
           cd ProyectoSA_backend/          
-          mvn -B -q clean install -U
-          mvn -B -q clean package
-          mvn -B -q clean test jacoco:report
+          mvn -T 1C -B -q clean install -U
+          mvn -T 1C -B -q clean package
+          mvn -T 1C -B -q clean test jacoco:report
     
       - name: Publish JaCoCo report artifacts
         uses: actions/upload-artifact@v2
