@@ -49,7 +49,7 @@ spec:
     app: spring-service
   ports:
     - protocol: TCP
-      port: 33065
+      port: 80
       targetPort: 33065
   type: LoadBalancer
 
@@ -75,34 +75,32 @@ spec:
           ports:
             - containerPort: 33065  # Puerto de tu aplicación Spring
 
-
-
-#---
-#apiVersion: networking.k8s.io/v1
-#kind: Ingress
-#metadata:
-  #name: spring-ingress-ext
- # namespace: default
-  #annotations:
-  #  kubernetes.io/ingress.global-static-ip-name: test-static-ip
-#spec:
-  #rules:
-    #- host: test-enviroment.ticketsys-asd.xyz
-      #http:
-        #paths:
-         # - pathType: Prefix
-        #    path: /
-       #     backend:
-      #        service:
-     #           name: spring-service
-    #            port:
-   #               number: 80
-  #defaultBackend:
-    #service:
-      #name: spring-service
-      #port:
-        #number: 80
-# status:
-#   loadBalancer: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: spring-ingress-ext
+  namespace: ${ENVIRONMENT}
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: test-static-ip
+spec:
+  rules:
+    #host: test-enviroment.ticketsys-asd.xyz
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: spring-service
+                port:
+                  number: 80
+  defaultBackend:
+    service:
+      name: spring-service
+      port:
+        number: 80
+  status:
+    loadBalancer: {}
 
           

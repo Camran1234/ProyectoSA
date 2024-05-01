@@ -116,11 +116,11 @@ jobs:
         run: |
           echo "Git Tag: <${{ steps.increment-git-tag.outputs.git-tag }}>"      
           
-      # Configurar .env frontend
+      # Configurar .env frontend BACKEND_ENVIRONMENT
       - name: Configure frontend environment variables
         run: |        
           cd ProyectoSA_frontend/
-          echo "${{ secrets.BACKEND_ENVIRONMENT }}" >> .env
+          echo "${{ secrets.TEST_ENVIRONMENT_A }}" >> .env
 
       # Construir y empujar imágenes Docker
       - name: Build and push Docker images
