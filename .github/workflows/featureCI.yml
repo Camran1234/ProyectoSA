@@ -82,7 +82,6 @@ jobs:
 
       - name: Configure kubeconfig # KUBECONFIG_DATA_TEST para test environment
         run: |
-          cat "${{ env.KUBECONFIG }}"
           echo "${{ env.KUBECONFIG }}" > ./kubeconfig
           cat kubeconfig
           export KUBECONFIG=$PWD/kubeconfig
