@@ -52,7 +52,7 @@ spec:
       port: 80
       targetPort: 33065
   type: LoadBalancer
-  loadBalancerIP: 34.139.29.63
+  loadBalancerIP: ${LOAD_BALANCER_IP}
 
 ---
 apiVersion: apps/v1

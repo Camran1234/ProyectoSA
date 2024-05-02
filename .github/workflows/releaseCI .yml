@@ -31,7 +31,7 @@ jobs:
           java-version: ${{ matrix.java-version }}
           distribution: 'adopt'
 
-      #  Configurar microservicios
+      # Configurar microservicios
       - name: Install and Build Microservice frontend
         run: |
           cd ProyectoSA_frontend/
@@ -39,10 +39,10 @@ jobs:
 
       - name: Install and Build Microservice tickets
         run: |
-          cd ProyectoSA_backend/
-          mvn clean install -U
-          mvn clean package
-          mvn clean test jacoco:report
+          cd ProyectoSA_backend/          
+          mvn -T 1C -B -q clean install -U
+          mvn -T 1C -B -q clean package
+          mvn -T 1C -B -q clean test jacoco:report
     
       - name: Publish JaCoCo report artifacts
         uses: actions/upload-artifact@v2
@@ -53,47 +53,56 @@ jobs:
   delivery-stage:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version:
-          - 21.7.0        
-        java-version:
-          - 17
-
     env:
-      REGION_REGISTRY: us-central1-docker.pkg.dev
-      PROJECT_ID: proyectosa-415901
-      REPOSITORY: docker-repository
-      ENVIRONMENT: production
-      
+      # Configurar por entorno
+      ENVIRONMENT: production-env #DOCKER y KUBERNETES NAMESPACES: test-env (test), develop-env (develop), production-env (production)      
+      GIT_UPDATE: major #GIT RELEASES: patch (test), minor (develop), major (production)
+      LOAD_BALANCER_IP: ${{ secrets.LOAD_BALANCER_IP_PRODUCTION }} # BACKEND LOAD BALANCER EXTERNAL IP, also is used to create frontend env: LOAD_BALANCER_IP_TEST, LOAD_BALANCER_IP_DEVELOP, LOAD_BALANCER_IP_PRODUCTION
+
+      # Constantes en todos los entornos
+      KUBECONFIG: ${{ secrets.KUBECONFIG_DATA_TEST_A }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }} # DOCKER USERNAME: use for connect to DH and Repository name
+      DOCKERHUB_ACCESS_TOKEN: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }} # DOCKER USERNAME: use for connect to DH
+    
     steps:
       # Copy code
       - name: Checkout and copy code to workflow
         uses: actions/checkout@v2
 
-      # Configure Nodejs and JVM
-      - name: Configure Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
+      # Configure docker Buildx
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-      - name: Set up Java JDK 17
-        uses: actions/setup-java@v3
+      # Configure Kubernetes control
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
         with:
-          java-version: ${{ matrix.java-version }}
-          distribution: 'adopt'
-      
-      # Configurar credenciales de Google Cloud Platform
-      - id: 'auth'
-        uses: 'google-github-actions/auth@v2'
+          version: 'latest'          
+
+      - name: Configure kubeconfig # KUBECONFIG_DATA_TEST para test environment
+        run: |
+          echo "${{ env.KUBECONFIG }}" > ./kubeconfig
+          echo "${{ env.KUBECONFIG }}" > ./deploy_frontend/resources/test/kubespray-do.conf
+          cat kubeconfig
+          export KUBECONFIG=$PWD/kubeconfig
+
+      - name: Print KUBECONFIG
+        run: |
+          kubectl --kubeconfig=kubeconfig get pods --all-namespaces
+
+      # Configure Ansible
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
+          ansible --version
+
+      # Autenticación con Dockerhub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
-
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v2'
-
-      - name: 'Use gcloud CLI'
-        run: 'gcloud info'
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_ACCESS_TOKEN }}      
 
       # TAG
       # Permisos
@@ -104,48 +113,42 @@ jobs:
       - name: Automatic Tagging of Releases
         id: increment-git-tag
         run: |
-          ./scripts/git_update.sh -v major        
+          ./scripts/git_update.sh -v ${{env.GIT_UPDATE}}        
         shell: bash
 
       # Debug Tag
       - name: Debug Git Tag
         run: |
           echo "Git Tag: <${{ steps.increment-git-tag.outputs.git-tag }}>"      
-
-      # Configurar Docker con autenticación de Google Cloud
-      - name: Configure Docker
-        run: |
-          gcloud auth configure-docker --quiet
-          gcloud auth configure-docker $REGION_REGISTRY --quiet
           
-      # Configurar .env frontend
+      # Configurar .env frontend BACKEND_ENVIRONMENT
       - name: Configure frontend environment variables
+        env:
+          # FRONTEND ENV: Configure environment directions backend to Frontend env
+          FRONTEND_ENVIRONMENT: |
+            VITE_API=http://${{ env.LOAD_BALANCER_IP }}  
+            VITE_WS_API=ws://${{ env.LOAD_BALANCER_IP }}/ws
         run: |        
           cd ProyectoSA_frontend/
-          echo "${{ secrets.PRODUCTION_ENVIRONMENT }}" >> .env    
+          echo "${{ env.FRONTEND_ENVIRONMENT }}" >> .env
 
-      # Configurar dockers
-      - name: Push Docker Image to Artifact Registry MySQL Service
-        env: 
-          GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
-          IMAGE_NAME_MS: mysql_microservice
-          DIRECTORY: Documentation/    
-        run: |
-          bash scripts/build_and_push_image.sh --environment="$ENVIRONMENT" --directory="$DIRECTORY" --region="$REGION_REGISTRY" --project_id="$PROJECT_ID" --repository="$REPOSITORY" --image_name="$IMAGE_NAME_MS" --tag="$GIT_TAG" 
-
-      - name: Push Docker Image to Artifact Registry Microservice Frontend
+      # Construir y empujar imágenes Docker
+      - name: Build and push Docker images
         env:
           GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
-          IMAGE_NAME_MS: node_microservice_frontend      
-          DIRECTORY: ProyectoSA_frontend/ 
+          #Agregar en este apartado la imagen del frontend
+          IMAGES_DIRECTORIES: |
+            data_service:Documentation/
+            maven_microservice_ticket:ProyectoSA_backend/
+            frontend_microservice_ticket:ProyectoSA_frontend/
+        # Iterate over each pair and build/push Docker images
         run: |
-          bash scripts/build_and_push_image.sh --environment="$ENVIRONMENT" --directory="$DIRECTORY" --region="$REGION_REGISTRY" --project_id="$PROJECT_ID" --repository="$REPOSITORY" --image_name="$IMAGE_NAME_MS" --tag="$GIT_TAG" 
-
-      - name: Push Docker Image to Artifact Registry Microservice Ticket
-        env:
-          GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
-          IMAGE_NAME_MS: maven_microservice_ticket
-          DIRECTORY: ProyectoSA_backend/ 
-        run: |
-          bash scripts/build_and_push_image.sh --environment="$ENVIRONMENT" --directory="$DIRECTORY" --region="$REGION_REGISTRY" --project_id="$PROJECT_ID" --repository="$REPOSITORY" --image_name="$IMAGE_NAME_MS" --tag="$GIT_TAG" 
-  
+          for pair in $IMAGES_DIRECTORIES; do
+            IFS=':' read -r image_name directory <<< "$pair"
+            bash scripts/build_and_push_image_dockerhub.sh \
+              --environment="${{ env.ENVIRONMENT       }}" --directory="${directory}"   \
+              --repository="${{ env.DOCKERHUB_USERNAME }}" --image_name="${image_name}" \
+              --tag="${{ env.GIT_TAG }}"
+          done     
+          
+      
