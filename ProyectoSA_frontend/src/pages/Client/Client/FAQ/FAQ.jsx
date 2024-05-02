@@ -7,14 +7,15 @@ export const FAQ = ({hiddenData=false}) => {
         <div style={{ 
             backgroundImage: `url(${mainImg})`, 
             backgroundSize: 'cover', 
-            backgroundRepeat: 'repeat', 
-            minHeight: '1000vh' 
+            backgroundRepeat: 'repeat', // Cambiado a 'no-repeat' para evitar repeticiones
+            backgroundPosition: 'center', // Ajusta la posición del fondo al centro
+            height: '100vh', 
         }}>
             <NavBar 
                 hiddenData={hiddenData}
             />            
-            <div className="contianer">
-                <div className="container-faq" style={{marginTop:'10vh'}} >
+            <div className="container">
+                <div className="container-faq" style={{marginTop:'5vh'}} >
                     <h1 className="tittle-class" >FAQ</h1>     
                         <div className="text-class">
                             <h3 className="subtitle-class">¿Como puedo registrarme en el sistema? Esto es de maravilla</h3>
@@ -31,7 +32,7 @@ export const FAQ = ({hiddenData=false}) => {
                             </p>
                         </div>     
                         <div className="text-class">
-                            <h3 className="subtitle-class">¿Como crear un ticket? - Calificacion F2 - G3</h3>
+                            <h3 className="subtitle-class">¿Como crear un ticket?</h3>
                             <p>
                                 De primero tienes que iniciar sesion en la aplicación y posteriormente seleccionar la opción
                                 <strong> Ticket {">"} Crear Ticket</strong> luego llena el formulario para crear un ticket
@@ -47,7 +48,7 @@ export const FAQ = ({hiddenData=false}) => {
                             </p>
                         </div>    
                         <div className="text-class">
-                            <h3 className="subtitle-class">¿Cómo rastreo un ticket que ya creé? - Calificacion F2 - G3</h3>
+                            <h3 className="subtitle-class">¿Cómo rastreo un ticket que ya creé?</h3>
                             <p>
                                 BLA BLA BLA De primero te tienes que dirigir al menú de <strong>Ticket {">"} Rastrear Tickets</strong> una vez
                                 que ya hayas iniciado la sesión en la aplicación. El sistema te indicará los tickets que son tuyos, 

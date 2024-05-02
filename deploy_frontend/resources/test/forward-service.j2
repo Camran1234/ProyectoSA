@@ -1,0 +1,9 @@
+[Unit]
+Description=Kubectl Port Forward Service
+
+[Service]
+Type=simple
+ExecStart=/snap/bin/kubectl --kubeconfig /etc/systemd/system/kubespray-do.conf port-forward service/spring-service 33065 --namespace test-env
+
+[Install]
+WantedBy=multi-user.target

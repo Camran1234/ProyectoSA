@@ -1,0 +1,6 @@
+---
+- name: Verificar conectividad con otros hosts
+  hosts: all
+  tasks:
+    - name: Ping a los hosts remotos
+      ping:

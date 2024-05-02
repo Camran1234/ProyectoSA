@@ -8,41 +8,119 @@ on:
 jobs:  
   delivery-stage:
     runs-on: ubuntu-latest
-      
+
+    env:
+      # Configurar por entorno
+      ENV_ANS_TERR: production # TERRAFORM AND ANSIBLE ENV   
+      ENVIRONMENT: production-env #DOCKER y KUBERNETES NAMESPACES: test-env (test), develop-env (develop), production-env (production)      
+      GIT_UPDATE: major #GIT RELEASES: patch (test), minor (develop), major (production)
+      LOAD_BALANCER_IP: ${{ secrets.LOAD_BALANCER_IP_PRODUCTION }} # BACKEND LOAD BALANCER EXTERNAL IP, also is used to create frontend env: LOAD_BALANCER_IP_TEST, LOAD_BALANCER_IP_DEVELOP, LOAD_BALANCER_IP_PRODUCTION
+
+      # Constantes en todos los entornos
+      KUBECONFIG: ${{ secrets.KUBECONFIG_DATA_TEST_A }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }} # DOCKER USERNAME: use for connect to DH and Repository name
+      DOCKERHUB_ACCESS_TOKEN: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }} # DOCKER USERNAME: use for connect to DH
+    
     steps:
       # Copy code
       - name: Checkout and copy code to workflow
         uses: actions/checkout@v2
-            
-      # Configurar credenciales de Google Cloud Platform
-      - id: 'auth'
-        uses: 'google-github-actions/auth@v2'
+
+      # Configure Kubernetes control
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
         with:
-          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+          version: 'latest'          
 
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v2'
+      - name: Configure kubeconfig # KUBECONFIG_DATA_TEST para test environment
+        run: |
+          echo "${{ env.KUBECONFIG }}" > ./kubeconfig
+          cat kubeconfig
+          export KUBECONFIG=$PWD/kubeconfig
 
-      - name: 'Use gcloud CLI'
-        run: 'gcloud info'      
-  
-      # Kubernets
-      - name: Deploy to GKE cluster
-        uses: ameydev/gke-kubectl-action@master
+      - name: Print KUBECONFIG
+        run: |
+          kubectl --kubeconfig=kubeconfig get pods --all-namespaces
+
+      # Configure Ansible
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
+          ansible --version
+
+      # TAG     
+      #Test tag production
+      - name: Obtener el tag más reciente
+        id: obtener-tag
+        run: |
+          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo "::set-output name=latest_tag::$latest_tag"
+
+      - name: Usar el tag obtenido
+        run: echo "El tag más reciente es ${{ steps.obtener-tag.outputs.latest_tag }}"
+
+      # Desplegar
+      - name: Deploy prepare files
         env:
-          PROJECT_ID: proyectosa-415901
-          APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS_BASE64 }}
-          CLUSTER_NAME: sa-production
-          ZONE_NAME: us-central1
-        with:
-          args: delete -f k8s/production-environment/ || true
+          #ENVIRONMENT: ${{ env.ENVIRONMENT }}
+          GIT_TAG: ${{ steps.obtener-tag.outputs.latest_tag }}
+        run: |
+          sed -i "s/\${REPOSITORY}/$(echo ${{ env.DOCKERHUB_USERNAME }})/g" k8s/k8s-configure.yaml
+          sed -i "s/\${TAG}/$(echo ${{ env.GIT_TAG }})/g" k8s/k8s-configure.yaml
+          sed -i "s/\${ENVIRONMENT}/$(echo ${{ env.ENVIRONMENT }})/g" k8s/k8s-configure.yaml
+          sed -i "s/\${LOAD_BALANCER_IP}/$(echo ${{ env.LOAD_BALANCER_IP }})/g" k8s/k8s-configure.yaml          
+          cat k8s/k8s-configure.yaml
 
-      - name: Deploy to GKE cluster
-        uses: ameydev/gke-kubectl-action@master
-        env:
-          PROJECT_ID: proyectosa-415901
-          APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS_BASE64 }}
-          CLUSTER_NAME: sa-production
-          ZONE_NAME: us-central1
+      # Desplegar
+      - name: Deploy
+        run: |
+          kubectl --kubeconfig=kubeconfig apply -f k8s/
+        # continue-on-error: true
+
+      # Dar permisos a las llaves
+      - name: Give privileges to keys
+        run: |
+          chmod 600 deploy_frontend/resources/${{ ENV.ENV_ANS_TERR }}/${{ ENV.ENV_ANS_TERR }}_rsa
+          chmod 600 deploy_frontend/resources/${{ ENV.ENV_ANS_TERR }}/${{ ENV.ENV_ANS_TERR }}_rsa.pub
+
+      ## Set up terraform
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
         with:
-          args: apply -f k8s/production-environment/
+          terraform_version: 1.2.1.
+
+      ## Terraform init
+      - name: Init terraform
+        run: |
+          cd deploy_frontend/terraform/${{ ENV.ENV_ANS_TERR }}
+          terraform init
+
+      ## Terraform plan
+      - name: Plan terraform
+        run: |
+          cd deploy_frontend/terraform/${{ ENV.ENV_ANS_TERR }}
+          terraform plan
+      
+      ## Terraform apply
+      - name: Apply terraform
+        run: |
+          cd deploy_frontend/terraform/${{ ENV.ENV_ANS_TERR }}
+          terraform apply -auto-approve
+        continue-on-error: true
+
+      # Preparar playbook
+      - name: Prepare playbook
+        env:
+          GIT_TAG: ${{ steps.obtener-tag.outputs.latest_tag }}
+        run: |
+          sed -i "s/\${REPOSITORY}/$(echo ${{ env.DOCKERHUB_USERNAME }})/g" deploy_frontend/ansible/client-ansible.yaml
+          sed -i "s/\${TAG}/$(echo ${{ env.GIT_TAG }})/g" deploy_frontend/ansible/client-ansible.yaml
+          sed -i "s/\${ENVIRONMENT}/$(echo ${{ env.ENVIRONMENT }})/g" deploy_frontend/ansible/client-ansible.yaml
+          cat deploy_frontend/ansible/client-ansible.yaml      
+    
+      # Ejecutar ansible frontend para ENVIRONMENT ## cd deploy_frontend/ansible/test
+      - name: Run Ansible playbook
+        run: |
+          cd deploy_frontend/ansible/
+          ansible-playbook -i ${{ ENV.ENV_ANS_TERR }}/inventory.ini client-ansible.yaml 

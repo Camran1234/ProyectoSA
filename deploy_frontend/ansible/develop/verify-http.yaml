@@ -1,0 +1,26 @@
+---
+- name: Verificar acceso a los puertos HTTP y HTTPS en las VMs
+  hosts: clients
+  tasks:
+    - name: Verificar acceso HTTP
+      uri:
+        url: "http://{{ ansible_host }}"
+        status_code: 200
+        timeout: 5
+      ignore_errors: yes
+      register: http_check_result
+
+    - name: Verificar acceso HTTPS
+      uri:
+        url: "https://{{ ansible_host }}"
+        status_code: 200
+        timeout: 5
+      ignore_errors: yes
+      register: https_check_result
+
+    - name: Mostrar resultados de la verificación
+      debug:
+        msg: |
+          VM {{ ansible_host }}:
+          - Acceso HTTP: {{ 'Success' if http_check_result.status == 200 else 'Failed' }}
+          - Acceso HTTPS: {{ 'Success' if https_check_result.status == 200 else 'Failed' }}

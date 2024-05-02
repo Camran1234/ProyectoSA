@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - develop
-
+      
 jobs:
   build_stage:
     runs-on: ubuntu-latest
@@ -31,7 +31,7 @@ jobs:
           java-version: ${{ matrix.java-version }}
           distribution: 'adopt'
 
-      #  Configurar microservicios
+      # Configurar microservicios
       - name: Install and Build Microservice frontend
         run: |
           cd ProyectoSA_frontend/
@@ -39,10 +39,10 @@ jobs:
 
       - name: Install and Build Microservice tickets
         run: |
-          cd ProyectoSA_backend/
-          mvn clean install -U
-          mvn clean package
-          mvn clean test jacoco:report
+          cd ProyectoSA_backend/          
+          mvn -T 1C -B -q clean install -U
+          mvn -T 1C -B -q clean package
+          mvn -T 1C -B -q clean test jacoco:report
     
       - name: Publish JaCoCo report artifacts
         uses: actions/upload-artifact@v2
@@ -53,47 +53,56 @@ jobs:
   delivery-stage:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version:
-          - 21.7.0        
-        java-version:
-          - 17
-
     env:
-      REGION_REGISTRY: us-central1-docker.pkg.dev
-      PROJECT_ID: proyectosa-415901
-      REPOSITORY: docker-repository
-      ENVIRONMENT: development
+      # Configurar por entorno
+      ENV_ANS_TERR: develop # TERRAFORM AND ANSIBLE ENV   
+      ENVIRONMENT: develop-env #DOCKER y KUBERNETES NAMESPACES: test-env (test), develop-env (develop), production-env (production)      
+      GIT_UPDATE: minor #GIT RELEASES: patch (test), minor (develop), major (production)
+      LOAD_BALANCER_IP: ${{ secrets.LOAD_BALANCER_IP_DEVELOP }} # BACKEND LOAD BALANCER EXTERNAL IP, also is used to create frontend env: LOAD_BALANCER_IP_TEST, LOAD_BALANCER_IP_DEVELOP, LOAD_BALANCER_IP_PRODUCTION
 
+      # Constantes en todos los entornos
+      KUBECONFIG: ${{ secrets.KUBECONFIG_DATA_TEST_A }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }} # DOCKER USERNAME: use for connect to DH and Repository name
+      DOCKERHUB_ACCESS_TOKEN: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }} # DOCKER USERNAME: use for connect to DH
+    
     steps:
       # Copy code
       - name: Checkout and copy code to workflow
         uses: actions/checkout@v2
 
-      # Configure Nodejs and JVM
-      - name: Configure Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
+      # Configure docker Buildx
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-      - name: Set up Java JDK 17
-        uses: actions/setup-java@v3
+      # Configure Kubernetes control
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
         with:
-          java-version: ${{ matrix.java-version }}
-          distribution: 'adopt'
-      
-      # Configurar credenciales de Google Cloud Platform
-      - id: 'auth'
-        uses: 'google-github-actions/auth@v2'
+          version: 'latest'          
+
+      - name: Configure kubeconfig # KUBECONFIG_DATA_TEST para test environment
+        run: |
+          echo "${{ env.KUBECONFIG }}" > ./kubeconfig
+          cat kubeconfig
+          export KUBECONFIG=$PWD/kubeconfig
+
+      - name: Print KUBECONFIG
+        run: |
+          kubectl --kubeconfig=kubeconfig get pods --all-namespaces
+
+      # Configure Ansible
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
+          ansible --version
+
+      # Autenticación con Dockerhub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
-
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v2'
-
-      - name: 'Use gcloud CLI'
-        run: 'gcloud info'
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_ACCESS_TOKEN }}      
 
       # TAG
       # Permisos
@@ -104,68 +113,115 @@ jobs:
       - name: Automatic Tagging of Releases
         id: increment-git-tag
         run: |
-          ./scripts/git_update.sh -v minor        
+          ./scripts/git_update.sh -v ${{env.GIT_UPDATE}}        
         shell: bash
 
       # Debug Tag
       - name: Debug Git Tag
         run: |
           echo "Git Tag: <${{ steps.increment-git-tag.outputs.git-tag }}>"      
-
-      # Configurar Docker con autenticación de Google Cloud
-      - name: Configure Docker
-        run: |
-          gcloud auth configure-docker --quiet
-          gcloud auth configure-docker $REGION_REGISTRY --quiet
           
-      # Configurar .env frontend
+      # Configurar .env frontend BACKEND_ENVIRONMENT
       - name: Configure frontend environment variables
+        env:
+          # FRONTEND ENV: Configure environment directions backend to Frontend env
+          FRONTEND_ENVIRONMENT: |
+            VITE_API=http://${{ env.LOAD_BALANCER_IP }}  
+            VITE_WS_API=ws://${{ env.LOAD_BALANCER_IP }}/ws
         run: |        
           cd ProyectoSA_frontend/
-          echo "${{ secrets.DEVELOPMENT_ENVIRONMENT }}" >> .env
+          echo "${{ env.FRONTEND_ENVIRONMENT }}" >> .env
+
+      # Construir y empujar imágenes Docker
+      - name: Build and push Docker images
+        env:
+          GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
+          #Agregar en este apartado la imagen del frontend
+          IMAGES_DIRECTORIES: |
+            data_service:Documentation/
+            maven_microservice_ticket:ProyectoSA_backend/
+            frontend_microservice_ticket:ProyectoSA_frontend/
+        # Iterate over each pair and build/push Docker images
+        run: |
+          for pair in $IMAGES_DIRECTORIES; do
+            IFS=':' read -r image_name directory <<< "$pair"
+            bash scripts/build_and_push_image_dockerhub.sh \
+              --environment="${{ env.ENVIRONMENT       }}" --directory="${directory}"   \
+              --repository="${{ env.DOCKERHUB_USERNAME }}" --image_name="${image_name}" \
+              --tag="${{ env.GIT_TAG }}"
+          done
+
+      #Test tag production
+      - name: Obtener el tag más reciente
+        id: obtener-tag
+        run: |
+          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo "::set-output name=latest_tag::$latest_tag"
+
+      - name: Usar el tag obtenido
+        run: echo "El tag más reciente es ${{ steps.obtener-tag.outputs.latest_tag }}"
+
+      # Desplegar
+      - name: Deploy prepare files
+        env:
+          #ENVIRONMENT: ${{ env.ENVIRONMENT }}
+          GIT_TAG: ${{ steps.obtener-tag.outputs.latest_tag }}
+        run: |
+          sed -i "s/\${REPOSITORY}/$(echo ${{ env.DOCKERHUB_USERNAME }})/g" k8s/k8s-configure.yaml
+          sed -i "s/\${TAG}/$(echo ${{ env.GIT_TAG }})/g" k8s/k8s-configure.yaml
+          sed -i "s/\${ENVIRONMENT}/$(echo ${{ env.ENVIRONMENT }})/g" k8s/k8s-configure.yaml
+          sed -i "s/\${LOAD_BALANCER_IP}/$(echo ${{ env.LOAD_BALANCER_IP }})/g" k8s/k8s-configure.yaml          
+          cat k8s/k8s-configure.yaml
+
+      # Desplegar
+      - name: Deploy
+        run: |
+          kubectl --kubeconfig=kubeconfig apply -f k8s/
+        # continue-on-error: true
+
+      # Dar permisos a las llaves
+      - name: Give privileges to keys
+        run: |
+          chmod 600 deploy_frontend/resources/${{ ENV.ENV_ANS_TERR }}/${{ ENV.ENV_ANS_TERR }}_rsa
+          chmod 600 deploy_frontend/resources/${{ ENV.ENV_ANS_TERR }}/${{ ENV.ENV_ANS_TERR }}_rsa.pub
+
+      ## Set up terraform
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.2.1.
+
+      ## Terraform init
+      - name: Init terraform
+        run: |
+          cd deploy_frontend/terraform/${{ ENV.ENV_ANS_TERR }}
+          terraform init
+
+      ## Terraform plan
+      - name: Plan terraform
+        run: |
+          cd deploy_frontend/terraform/${{ ENV.ENV_ANS_TERR }}
+          terraform plan
       
-      # Configurar dockers
-      - name: Push Docker Image to Artifact Registry MySQL Service
-        env: 
-          GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
-          IMAGE_NAME_MS: mysql_microservice
-          DIRECTORY: Documentation/    
+      ## Terraform apply
+      - name: Apply terraform
         run: |
-          bash scripts/build_and_push_image.sh --environment="$ENVIRONMENT" --directory="$DIRECTORY" --region="$REGION_REGISTRY" --project_id="$PROJECT_ID" --repository="$REPOSITORY" --image_name="$IMAGE_NAME_MS" --tag="$GIT_TAG" 
+          cd deploy_frontend/terraform/${{ ENV.ENV_ANS_TERR }}
+          terraform apply -auto-approve
+        continue-on-error: true
 
-      - name: Push Docker Image to Artifact Registry Microservice Frontend
+      # Preparar playbook
+      - name: Prepare playbook
         env:
-          GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
-          IMAGE_NAME_MS: node_microservice_frontend      
-          DIRECTORY: ProyectoSA_frontend/ 
+          GIT_TAG: ${{ steps.obtener-tag.outputs.latest_tag }}
         run: |
-          bash scripts/build_and_push_image.sh --environment="$ENVIRONMENT" --directory="$DIRECTORY" --region="$REGION_REGISTRY" --project_id="$PROJECT_ID" --repository="$REPOSITORY" --image_name="$IMAGE_NAME_MS" --tag="$GIT_TAG" 
-
-      - name: Push Docker Image to Artifact Registry Microservice Ticket
-        env:
-          GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
-          IMAGE_NAME_MS: maven_microservice_ticket
-          DIRECTORY: ProyectoSA_backend/ 
+          sed -i "s/\${REPOSITORY}/$(echo ${{ env.DOCKERHUB_USERNAME }})/g" deploy_frontend/ansible/client-ansible.yaml
+          sed -i "s/\${TAG}/$(echo ${{ env.GIT_TAG }})/g" deploy_frontend/ansible/client-ansible.yaml
+          sed -i "s/\${ENVIRONMENT}/$(echo ${{ env.ENVIRONMENT }})/g" deploy_frontend/ansible/client-ansible.yaml
+          cat deploy_frontend/ansible/client-ansible.yaml      
+    
+      # Ejecutar ansible frontend para ENVIRONMENT ## cd deploy_frontend/ansible/test
+      - name: Run Ansible playbook
         run: |
-          bash scripts/build_and_push_image.sh --environment="$ENVIRONMENT" --directory="$DIRECTORY" --region="$REGION_REGISTRY" --project_id="$PROJECT_ID" --repository="$REPOSITORY" --image_name="$IMAGE_NAME_MS" --tag="$GIT_TAG" 
-  
-      # Kubernets
-      - name: Deploy to GKE cluster - DELETE PREVIOUS VERSION
-        uses: ameydev/gke-kubectl-action@master
-        env:
-          PROJECT_ID: proyectosa-415901
-          APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS_BASE64 }}
-          CLUSTER_NAME: sa-develop
-          ZONE_NAME: us-central1 
-        with:
-          args: delete -f k8s/development-environment/ || true
-
-      - name: Deploy to GKE cluster
-        uses: ameydev/gke-kubectl-action@master
-        env:
-          PROJECT_ID: proyectosa-415901
-          APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS_BASE64 }}
-          CLUSTER_NAME: sa-develop
-          ZONE_NAME: us-central1 
-        with:
-          args: apply -f k8s/development-environment/
+          cd deploy_frontend/ansible/
+          ansible-playbook -i ${{ ENV.ENV_ANS_TERR }}/inventory.ini client-ansible.yaml
